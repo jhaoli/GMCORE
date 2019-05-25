@@ -1,0 +1,584 @@
+The system is: Darwin - 18.2.0 - x86_64
+Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
+Compiler: /usr/local/bin/gfortran 
+Build flags: 
+Id flags: -v 
+
+The output was:
+0
+Driving: /usr/local/bin/gfortran -v CMakeFortranCompilerId.F -mmacosx-version-min=10.14.0 -asm_macosx_version_min=10.14 -l gfortran -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/lto-wrapper
+Target: x86_64-apple-darwin18.2.0
+Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+Thread model: posix
+gcc version 8.3.0 (Homebrew GCC 8.3.0) 
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccC39QY8.f90 -quiet -v -D__DYNAMIC__ CMakeFortranCompilerId.F -fPIC -quiet -dumpbase CMakeFortranCompilerId.F -mmacosx-version-min=10.14.0 -mtune=core2 -auxbase CMakeFortranCompilerId -version -fintrinsic-modules-path /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccgKgnXl.s
+GNU Fortran (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include"
+ignoring nonexistent directory "/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../../../../x86_64-apple-darwin18.2.0/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed
+ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+End of search list.
+GNU Fortran2008 (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0'  '-shared-libgcc' '-mtune=core2'
+ as -arch x86_64 -v -force_cpusubtype_ALL -mmacosx-version-min=10.14 -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccygxb3i.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccgKgnXl.s
+Apple LLVM version 10.0.0 (clang-1000.11.45.5)
+Target: x86_64-apple-darwin18.2.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1as -triple x86_64-apple-macosx10.14.0 -filetype obj -main-file-name ccgKgnXl.s -target-cpu penryn -fdebug-compilation-dir /Users/hao/work/GMCORE/build/CMakeFiles/3.14.1/CompilerIdFortran -dwarf-debug-producer Apple LLVM version 10.0.0 (clang-1000.11.45.5) -dwarf-version=4 -mrelocation-model pic -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccygxb3i.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccgKgnXl.s
+Reading specs from /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0'  '-shared-libgcc' '-mtune=core2'
+COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/
+LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0'  '-shared-libgcc' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/ -dynamic -arch x86_64 -macosx_version_min 10.14.0 -weak_reference_mismatches non-weak -o a.out -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccygxb3i.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+collect2 version 8.3.0
+/usr/bin/ld -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/ -dynamic -arch x86_64 -macosx_version_min 10.14.0 -weak_reference_mismatches non-weak -o a.out -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccygxb3i.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+@(#)PROGRAM:ld  PROJECT:ld64-409.12
+BUILD 17:47:51 Sep 25 2018
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em arm64e arm64_32
+Library search paths:
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8
+	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+Framework search paths:
+	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/
+ /usr/bin/nm -n /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccygxb3i.o
+
+
+Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "a.out"
+
+The Fortran compiler identification is GNU, found in "/Users/hao/work/GMCORE/build/CMakeFiles/3.14.1/CompilerIdFortran/a.out"
+
+Determining if the Fortran compiler works passed with the following output:
+Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e8e0d/fast 
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_e8e0d.dir/build.make CMakeFiles/cmTC_e8e0d.dir/build
+Building Fortran object CMakeFiles/cmTC_e8e0d.dir/testFortranCompiler.f.o
+/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -c /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_e8e0d.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTC_e8e0d
+/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e8e0d.dir/link.txt --verbose=1
+/usr/local/bin/gfortran      -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_e8e0d.dir/testFortranCompiler.f.o  -o cmTC_e8e0d 
+
+
+Detecting Fortran compiler ABI info compiled with the following output:
+Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d9f76/fast 
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_d9f76.dir/build.make CMakeFiles/cmTC_d9f76.dir/build
+Building Fortran object CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o
+/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -v -Wl,-v -c /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran
+Target: x86_64-apple-darwin18.2.0
+Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+Thread model: posix
+gcc version 8.3.0 (Homebrew GCC 8.3.0) 
+COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/f951 /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccNBDCEo.f90 -quiet -v -D__DYNAMIC__ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -fPIC -quiet -dumpbase CMakeFortranCompilerABI.F -mmacosx-version-min=10.14.0 -mtune=core2 -auxbase-strip CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cc11B1qy.s
+GNU Fortran (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/local/include"
+ignoring nonexistent directory "/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../../../../x86_64-apple-darwin18.2.0/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include
+End of search list.
+GNU Fortran2008 (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2'
+ as -arch x86_64 -v -force_cpusubtype_ALL -mmacosx-version-min=10.14 -o CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cc11B1qy.s
+Apple LLVM version 10.0.0 (clang-1000.11.45.5)
+Target: x86_64-apple-darwin18.2.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1as -triple x86_64-apple-macosx10.14.0 -filetype obj -main-file-name cc11B1qy.s -target-cpu penryn -fdebug-compilation-dir /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp -dwarf-debug-producer Apple LLVM version 10.0.0 (clang-1000.11.45.5) -dwarf-version=4 -mrelocation-model pic -o CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cc11B1qy.s
+COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/
+LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../
+COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2'
+Linking Fortran executable cmTC_d9f76
+/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d9f76.dir/link.txt --verbose=1
+/usr/local/bin/gfortran   -v -Wl,-v   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o  -o cmTC_d9f76 
+Driving: /usr/local/bin/gfortran -v -Wl,-v -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -o cmTC_d9f76 -mmacosx-version-min=10.14.0 -asm_macosx_version_min=10.14 -l gfortran -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/lto-wrapper
+Target: x86_64-apple-darwin18.2.0
+Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+Thread model: posix
+gcc version 8.3.0 (Homebrew GCC 8.3.0) 
+Reading specs from /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_d9f76' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2'
+COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/
+LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../
+COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_d9f76' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2 -dynamic -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -weak_reference_mismatches non-weak -o cmTC_d9f76 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. -v CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+collect2 version 8.3.0
+/usr/bin/ld -dynamic -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -weak_reference_mismatches non-weak -o cmTC_d9f76 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. -v CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+@(#)PROGRAM:ld  PROJECT:ld64-409.12
+BUILD 17:47:51 Sep 25 2018
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em arm64e arm64_32
+@(#)PROGRAM:ld  PROJECT:ld64-409.12
+BUILD 17:47:51 Sep 25 2018
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em arm64e arm64_32
+Library search paths:
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib
+Framework search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/
+ /usr/bin/nm -n CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o
+
+
+Parsed Fortran implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude]
+    add: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include]
+    add: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed]
+    add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+  end of search list found
+  collapse include dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude]
+  collapse include dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include]
+  collapse include dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+  implicit include dirs: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+
+
+Parsed Fortran implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/make cmTC_d9f76/fast ]
+  ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_d9f76.dir/build.make CMakeFiles/cmTC_d9f76.dir/build]
+  ignore line: [Building Fortran object CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -v -Wl,-v -c /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/local/bin/gfortran]
+  ignore line: [Target: x86_64-apple-darwin18.2.0]
+  ignore line: [Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Homebrew GCC 8.3.0) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-mtune=core2']
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/f951 /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccNBDCEo.f90 -quiet -v -D__DYNAMIC__ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -fPIC -quiet -dumpbase CMakeFortranCompilerABI.F -mmacosx-version-min=10.14.0 -mtune=core2 -auxbase-strip CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cc11B1qy.s]
+  ignore line: [GNU Fortran (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [warning: MPFR header version 4.0.1 differs from library version 4.0.2.]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/local/include"]
+  ignore line: [ignoring nonexistent directory "/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../../../../x86_64-apple-darwin18.2.0/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude]
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include]
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU Fortran2008 (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [warning: MPFR header version 4.0.1 differs from library version 4.0.2.]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2']
+  ignore line: [ as -arch x86_64 -v -force_cpusubtype_ALL -mmacosx-version-min=10.14 -o CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cc11B1qy.s]
+  ignore line: [Apple LLVM version 10.0.0 (clang-1000.11.45.5)]
+  ignore line: [Target: x86_64-apple-darwin18.2.0]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+  ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1as -triple x86_64-apple-macosx10.14.0 -filetype obj -main-file-name cc11B1qy.s -target-cpu penryn -fdebug-compilation-dir /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp -dwarf-debug-producer Apple LLVM version 10.0.0 (clang-1000.11.45.5) -dwarf-version=4 -mrelocation-model pic -o CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cc11B1qy.s]
+  ignore line: [COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/]
+  ignore line: [LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../]
+  ignore line: [COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2']
+  ignore line: [Linking Fortran executable cmTC_d9f76]
+  ignore line: [/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d9f76.dir/link.txt --verbose=1]
+  ignore line: [/usr/local/bin/gfortran   -v -Wl,-v   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o  -o cmTC_d9f76 ]
+  ignore line: [Driving: /usr/local/bin/gfortran -v -Wl,-v -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -o cmTC_d9f76 -mmacosx-version-min=10.14.0 -asm_macosx_version_min=10.14 -l gfortran -shared-libgcc]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/local/bin/gfortran]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/lto-wrapper]
+  ignore line: [Target: x86_64-apple-darwin18.2.0]
+  ignore line: [Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Homebrew GCC 8.3.0) ]
+  ignore line: [Reading specs from /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../libgfortran.spec]
+  ignore line: [rename spec lib to liborig]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_d9f76' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2']
+  ignore line: [COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/]
+  ignore line: [LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_d9f76' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2']
+  link line: [ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2 -dynamic -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -weak_reference_mismatches non-weak -o cmTC_d9f76 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. -v CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v]
+    arg [/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2] ==> ignore
+    arg [-dynamic] ==> ignore
+    arg [-arch] ==> ignore
+    arg [x86_64] ==> ignore
+    arg [-macosx_version_min] ==> ignore
+    arg [10.14.0] ==> ignore
+    arg [-syslibroot] ==> ignore
+    arg [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk] ==> ignore
+    arg [-weak_reference_mismatches] ==> ignore
+    arg [non-weak] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_d9f76] ==> ignore
+    arg [-L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0] ==> dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0]
+    arg [-L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../..] ==> dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../..]
+    arg [-v] ==> ignore
+    arg [CMakeFiles/cmTC_d9f76.dir/CMakeFortranCompilerABI.F.o] ==> ignore
+    arg [-lgfortran] ==> lib [gfortran]
+    arg [-no_compact_unwind] ==> ignore
+    arg [-lSystem] ==> lib [System]
+    arg [-lgcc_ext.10.5] ==> lib [gcc_ext.10.5]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lquadmath] ==> lib [quadmath]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_ext.10.5] ==> lib [gcc_ext.10.5]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lSystem] ==> lib [System]
+    arg [-v] ==> ignore
+  Library search paths: [;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib]
+  Framework search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/]
+  remove lib [System]
+  remove lib [System]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../..] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8]
+  collapse library dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib]
+  collapse framework dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks]
+  implicit libs: [gfortran;gcc_ext.10.5;gcc;quadmath;m;gcc_ext.10.5;gcc]
+  implicit dirs: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib]
+  implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks]
+
+
+Determining if the Fortran compiler supports Fortran 90 passed with the following output:
+Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3d263/fast 
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_3d263.dir/build.make CMakeFiles/cmTC_3d263.dir/build
+Building Fortran object CMakeFiles/cmTC_3d263.dir/testFortranCompilerF90.f90.o
+/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -c /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 -o CMakeFiles/cmTC_3d263.dir/testFortranCompilerF90.f90.o
+Linking Fortran executable cmTC_3d263
+/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3d263.dir/link.txt --verbose=1
+/usr/local/bin/gfortran      -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_3d263.dir/testFortranCompilerF90.f90.o  -o cmTC_3d263 
+
+
+The system is: Darwin - 18.2.0 - x86_64
+Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
+Compiler: /usr/local/bin/gfortran 
+Build flags: 
+Id flags: -v 
+
+The output was:
+0
+Driving: /usr/local/bin/gfortran -v CMakeFortranCompilerId.F -mmacosx-version-min=10.14.0 -asm_macosx_version_min=10.14 -l gfortran -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/lto-wrapper
+Target: x86_64-apple-darwin18.2.0
+Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+Thread model: posix
+gcc version 8.3.0 (Homebrew GCC 8.3.0) 
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccPiJmz4.f90 -quiet -v -D__DYNAMIC__ CMakeFortranCompilerId.F -fPIC -quiet -dumpbase CMakeFortranCompilerId.F -mmacosx-version-min=10.14.0 -mtune=core2 -auxbase CMakeFortranCompilerId -version -fintrinsic-modules-path /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cchuEovp.s
+GNU Fortran (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include"
+ignoring nonexistent directory "/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../../../../x86_64-apple-darwin18.2.0/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed
+ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+End of search list.
+GNU Fortran2008 (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0'  '-shared-libgcc' '-mtune=core2'
+ as -arch x86_64 -v -force_cpusubtype_ALL -mmacosx-version-min=10.14 -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccl3Ce4C.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cchuEovp.s
+Apple LLVM version 10.0.0 (clang-1000.11.45.5)
+Target: x86_64-apple-darwin18.2.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1as -triple x86_64-apple-macosx10.14.0 -filetype obj -main-file-name cchuEovp.s -target-cpu penryn -fdebug-compilation-dir /Users/hao/work/GMCORE/build/CMakeFiles/3.14.1/CompilerIdFortran -dwarf-debug-producer Apple LLVM version 10.0.0 (clang-1000.11.45.5) -dwarf-version=4 -mrelocation-model pic -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccl3Ce4C.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//cchuEovp.s
+Reading specs from /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0'  '-shared-libgcc' '-mtune=core2'
+COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/
+LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../
+COLLECT_GCC_OPTIONS='-v' '-mmacosx-version-min=10.14.0'  '-shared-libgcc' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/ -dynamic -arch x86_64 -macosx_version_min 10.14.0 -weak_reference_mismatches non-weak -o a.out -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccl3Ce4C.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+collect2 version 8.3.0
+/usr/bin/ld -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/ -dynamic -arch x86_64 -macosx_version_min 10.14.0 -weak_reference_mismatches non-weak -o a.out -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccl3Ce4C.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+@(#)PROGRAM:ld  PROJECT:ld64-409.12
+BUILD 17:47:51 Sep 25 2018
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em arm64e arm64_32
+Library search paths:
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8
+	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+Framework search paths:
+	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/
+ /usr/bin/nm -n /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccl3Ce4C.o
+
+
+Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "a.out"
+
+The Fortran compiler identification is GNU, found in "/Users/hao/work/GMCORE/build/CMakeFiles/3.14.1/CompilerIdFortran/a.out"
+
+Determining if the Fortran compiler works passed with the following output:
+Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_14dfc/fast 
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_14dfc.dir/build.make CMakeFiles/cmTC_14dfc.dir/build
+Building Fortran object CMakeFiles/cmTC_14dfc.dir/testFortranCompiler.f.o
+/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -c /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_14dfc.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTC_14dfc
+/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_14dfc.dir/link.txt --verbose=1
+/usr/local/bin/gfortran      -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_14dfc.dir/testFortranCompiler.f.o  -o cmTC_14dfc 
+
+
+Detecting Fortran compiler ABI info compiled with the following output:
+Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_68b50/fast 
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_68b50.dir/build.make CMakeFiles/cmTC_68b50.dir/build
+Building Fortran object CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o
+/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -v -Wl,-v -c /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran
+Target: x86_64-apple-darwin18.2.0
+Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+Thread model: posix
+gcc version 8.3.0 (Homebrew GCC 8.3.0) 
+COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/f951 /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccOIorDf.f90 -quiet -v -D__DYNAMIC__ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -fPIC -quiet -dumpbase CMakeFortranCompilerABI.F -mmacosx-version-min=10.14.0 -mtune=core2 -auxbase-strip CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccN4QtGd.s
+GNU Fortran (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/local/include"
+ignoring nonexistent directory "/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../../../../x86_64-apple-darwin18.2.0/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include
+ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include
+End of search list.
+GNU Fortran2008 (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP
+
+warning: MPFR header version 4.0.1 differs from library version 4.0.2.
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2'
+ as -arch x86_64 -v -force_cpusubtype_ALL -mmacosx-version-min=10.14 -o CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccN4QtGd.s
+Apple LLVM version 10.0.0 (clang-1000.11.45.5)
+Target: x86_64-apple-darwin18.2.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1as -triple x86_64-apple-macosx10.14.0 -filetype obj -main-file-name ccN4QtGd.s -target-cpu penryn -fdebug-compilation-dir /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp -dwarf-debug-producer Apple LLVM version 10.0.0 (clang-1000.11.45.5) -dwarf-version=4 -mrelocation-model pic -o CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccN4QtGd.s
+COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/
+LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../
+COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2'
+Linking Fortran executable cmTC_68b50
+/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_68b50.dir/link.txt --verbose=1
+/usr/local/bin/gfortran   -v -Wl,-v   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o  -o cmTC_68b50 
+Driving: /usr/local/bin/gfortran -v -Wl,-v -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -o cmTC_68b50 -mmacosx-version-min=10.14.0 -asm_macosx_version_min=10.14 -l gfortran -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/lto-wrapper
+Target: x86_64-apple-darwin18.2.0
+Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+Thread model: posix
+gcc version 8.3.0 (Homebrew GCC 8.3.0) 
+Reading specs from /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_68b50' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2'
+COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/
+LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../
+COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_68b50' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2'
+ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2 -dynamic -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -weak_reference_mismatches non-weak -o cmTC_68b50 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. -v CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+collect2 version 8.3.0
+/usr/bin/ld -dynamic -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -weak_reference_mismatches non-weak -o cmTC_68b50 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. -v CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v
+@(#)PROGRAM:ld  PROJECT:ld64-409.12
+BUILD 17:47:51 Sep 25 2018
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em arm64e arm64_32
+@(#)PROGRAM:ld  PROJECT:ld64-409.12
+BUILD 17:47:51 Sep 25 2018
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em arm64e arm64_32
+Library search paths:
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0
+	/usr/local/Cellar/gcc/8.3.0/lib/gcc/8
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib
+Framework search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/
+ /usr/bin/nm -n CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o
+
+
+Parsed Fortran implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude]
+    add: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include]
+    add: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed]
+    add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+  end of search list found
+  collapse include dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude]
+  collapse include dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include]
+  collapse include dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+  implicit include dirs: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+
+
+Parsed Fortran implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/make cmTC_68b50/fast ]
+  ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_68b50.dir/build.make CMakeFiles/cmTC_68b50.dir/build]
+  ignore line: [Building Fortran object CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -v -Wl,-v -c /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/local/bin/gfortran]
+  ignore line: [Target: x86_64-apple-darwin18.2.0]
+  ignore line: [Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Homebrew GCC 8.3.0) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-mtune=core2']
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/f951 /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccOIorDf.f90 -quiet -v -D__DYNAMIC__ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk /usr/local/Cellar/cmake/3.14.1/share/cmake/Modules/CMakeFortranCompilerABI.F -fPIC -quiet -dumpbase CMakeFortranCompilerABI.F -mmacosx-version-min=10.14.0 -mtune=core2 -auxbase-strip CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude -o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccN4QtGd.s]
+  ignore line: [GNU Fortran (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [warning: MPFR header version 4.0.1 differs from library version 4.0.2.]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/local/include"]
+  ignore line: [ignoring nonexistent directory "/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../../../../x86_64-apple-darwin18.2.0/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/finclude]
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include]
+  ignore line: [ /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/include-fixed]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU Fortran2008 (Homebrew GCC 8.3.0) version 8.3.0 (x86_64-apple-darwin18.2.0)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [warning: MPFR header version 4.0.1 differs from library version 4.0.2.]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2']
+  ignore line: [ as -arch x86_64 -v -force_cpusubtype_ALL -mmacosx-version-min=10.14 -o CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccN4QtGd.s]
+  ignore line: [Apple LLVM version 10.0.0 (clang-1000.11.45.5)]
+  ignore line: [Target: x86_64-apple-darwin18.2.0]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+  ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1as -triple x86_64-apple-macosx10.14.0 -filetype obj -main-file-name ccN4QtGd.s -target-cpu penryn -fdebug-compilation-dir /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp -dwarf-debug-producer Apple LLVM version 10.0.0 (clang-1000.11.45.5) -dwarf-version=4 -mrelocation-model pic -o CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o /var/folders/pq/pyz9w9p52s74ssj36jfhfrlw0000gn/T//ccN4QtGd.s]
+  ignore line: [COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/]
+  ignore line: [LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../]
+  ignore line: [COLLECT_GCC_OPTIONS='-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-v' '-c' '-o' 'CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o' '-mmacosx-version-min=10.14.0'  '-mtune=core2']
+  ignore line: [Linking Fortran executable cmTC_68b50]
+  ignore line: [/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_68b50.dir/link.txt --verbose=1]
+  ignore line: [/usr/local/bin/gfortran   -v -Wl,-v   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o  -o cmTC_68b50 ]
+  ignore line: [Driving: /usr/local/bin/gfortran -v -Wl,-v -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -o cmTC_68b50 -mmacosx-version-min=10.14.0 -asm_macosx_version_min=10.14 -l gfortran -shared-libgcc]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/local/bin/gfortran]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/lto-wrapper]
+  ignore line: [Target: x86_64-apple-darwin18.2.0]
+  ignore line: [Configured with: ../configure --build=x86_64-apple-darwin18.2.0 --prefix=/usr/local/Cellar/gcc/8.3.0 --libdir=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8 --disable-nls --enable-checking=release --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-8 --with-gmp=/usr/local/opt/gmp --with-mpfr=/usr/local/opt/mpfr --with-mpc=/usr/local/opt/libmpc --with-isl=/usr/local/opt/isl --with-system-zlib --with-pkgversion='Homebrew GCC 8.3.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --disable-multilib --with-native-system-header-dir=/usr/include --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Homebrew GCC 8.3.0) ]
+  ignore line: [Reading specs from /usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../libgfortran.spec]
+  ignore line: [rename spec lib to liborig]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_68b50' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2']
+  ignore line: [COMPILER_PATH=/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/]
+  ignore line: [LIBRARY_PATH=/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/:/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../../]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-isysroot' '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk' '-o' 'cmTC_68b50' '-mmacosx-version-min=10.14.0' '-asm_macosx_version_min=10.14' '-shared-libgcc' '-mtune=core2']
+  link line: [ /usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2 -dynamic -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -weak_reference_mismatches non-weak -o cmTC_68b50 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0 -L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../.. -v CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o -lgfortran -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lquadmath -lm -lgcc_ext.10.5 -lgcc -lSystem -v]
+    arg [/usr/local/Cellar/gcc/8.3.0/libexec/gcc/x86_64-apple-darwin18.2.0/8.3.0/collect2] ==> ignore
+    arg [-dynamic] ==> ignore
+    arg [-arch] ==> ignore
+    arg [x86_64] ==> ignore
+    arg [-macosx_version_min] ==> ignore
+    arg [10.14.0] ==> ignore
+    arg [-syslibroot] ==> ignore
+    arg [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk] ==> ignore
+    arg [-weak_reference_mismatches] ==> ignore
+    arg [non-weak] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_68b50] ==> ignore
+    arg [-L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0] ==> dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0]
+    arg [-L/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../..] ==> dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../..]
+    arg [-v] ==> ignore
+    arg [CMakeFiles/cmTC_68b50.dir/CMakeFortranCompilerABI.F.o] ==> ignore
+    arg [-lgfortran] ==> lib [gfortran]
+    arg [-no_compact_unwind] ==> ignore
+    arg [-lSystem] ==> lib [System]
+    arg [-lgcc_ext.10.5] ==> lib [gcc_ext.10.5]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lquadmath] ==> lib [quadmath]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_ext.10.5] ==> lib [gcc_ext.10.5]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lSystem] ==> lib [System]
+    arg [-v] ==> ignore
+  Library search paths: [;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib]
+  Framework search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/]
+  remove lib [System]
+  remove lib [System]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0/../../..] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0]
+  collapse library dir [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8] ==> [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8]
+  collapse library dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib]
+  collapse framework dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks]
+  implicit libs: [gfortran;gcc_ext.10.5;gcc;quadmath;m;gcc_ext.10.5;gcc]
+  implicit dirs: [/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/gcc/x86_64-apple-darwin18.2.0/8.3.0;/usr/local/Cellar/gcc/8.3.0/lib/gcc/8;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/lib]
+  implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks]
+
+
+Determining if the Fortran compiler supports Fortran 90 passed with the following output:
+Change Dir: /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_66dd7/fast 
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_66dd7.dir/build.make CMakeFiles/cmTC_66dd7.dir/build
+Building Fortran object CMakeFiles/cmTC_66dd7.dir/testFortranCompilerF90.f90.o
+/usr/local/bin/gfortran   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -c /Users/hao/work/GMCORE/build/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 -o CMakeFiles/cmTC_66dd7.dir/testFortranCompilerF90.f90.o
+Linking Fortran executable cmTC_66dd7
+/usr/local/Cellar/cmake/3.14.1/bin/cmake -E cmake_link_script CMakeFiles/cmTC_66dd7.dir/link.txt --verbose=1
+/usr/local/bin/gfortran      -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk CMakeFiles/cmTC_66dd7.dir/testFortranCompilerF90.f90.o  -o cmTC_66dd7 
+
+

@@ -1,0 +1,20 @@
+# The fortran modules provided by this target.
+provides
+ data_mod.mod
+ diag_mod.mod
+ dycore_mod.mod
+ history_mod.mod
+ io_mod.mod
+ jet_zonal_flow_test_mod.mod
+ log_mod.mod
+ mesh_mod.mod
+ mountain_zonal_flow_test_mod.mod
+ parallel_mod.mod
+ params_mod.mod
+ restart_mod.mod
+ rossby_haurwitz_wave_test_mod.mod
+ shallow_water_waves_test_mod.mod
+ steady_geostrophic_flow_test_mod.mod
+ string_mod.mod
+ time_mod.mod
+ types_mod.mod
