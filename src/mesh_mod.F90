@@ -51,7 +51,7 @@ contains
     mesh%num_full_lon = num_lon
     mesh%num_half_lon = num_lon
     mesh%num_full_lat = num_lat
-    mesh%num_half_lat = num_lat - 1
+    mesh%num_half_lat = num_lat + 1
 
     allocate(mesh%full_lon(mesh%num_full_lon))
     allocate(mesh%half_lon(mesh%num_half_lon))
