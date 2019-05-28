@@ -80,7 +80,7 @@ contains
       mesh%full_lon_deg(i) = mesh%full_lon(i) * rad_to_deg
       mesh%half_lon_deg(i) = mesh%half_lon(i) * rad_to_deg
     end do
-
+ 
     mesh%dlat = pi / mesh%num_full_lat
     do j = 1, mesh%num_full_lat
       mesh%half_lat(j) = - 0.5 * pi + (j - 1) * mesh%dlat
@@ -90,7 +90,7 @@ contains
     end do
     mesh%half_lat(mesh%num_half_lat) = 0.5 * pi
     mesh%half_lat_deg(mesh%num_half_lat) = 90.0
-
+     
     do i = 1, mesh%num_full_lon
       mesh%full_cos_lon(i) = cos(mesh%full_lon(i))
       mesh%full_sin_lon(i) = sin(mesh%full_lon(i))
@@ -135,7 +135,7 @@ contains
     end do
     mesh%half_area(1) = radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
     mesh%half_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
-
+    
 !     print*, 'total primal area:', sum(mesh%full_area)*180
 !     print*, 'total   dual area:', sum(mesh%half_area)*180
 !     print*, 'the earth    area:', 4 * pi * radius**2

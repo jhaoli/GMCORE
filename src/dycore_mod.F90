@@ -1,6 +1,6 @@
 module dycore_mod
 
-  use params_mod, split_scheme_in => split_scheme, uv_adv_scheme_in => uv_adv_scheme
+  use params_mod, split_scheme_in => split_scheme
   use data_mod
   use log_mod
   use types_mod
@@ -32,16 +32,12 @@ module dycore_mod
   integer, parameter :: fast_pass = 1
   integer, parameter :: slow_pass = 2
 
-  integer uv_adv_scheme
-  integer, parameter :: center_diff = 0
-  integer, parameter :: upwind = 1
-  integer, parameter :: weno = 2
-
   interface
-    subroutine integrator_interface(time_step_size, old, new, qcon_modified_)
+    subroutine integrator_interface(time_step_size, old, new, pass, qcon_modified_)
       real, intent(in) :: time_step_size
       integer, intent(in) :: old
       integer, intent(in) :: new
+      integer, intent(in) :: pass 
       logical, intent(in), optional :: qcon_modified_
     end subroutine
   end interface
@@ -86,18 +82,6 @@ contains
     case default
       split_scheme = 0
       call log_notice('No fast-slow split.')
-    end select
-
-    select case (uv_adv_scheme_in)
-    case ('center_diff')
-      uv_adv_scheme = center_diff
-    case ('upwind')
-      uv_adv_scheme = upwind
-!     case ('weno')
-!       uv_adv_scheme = weno
-!       call weno_init()
-    case default
-      call log_error('Unknown uv_adv_scheme ' // trim(uv_adv_scheme_in) // '!')
     end select
 
     call log_notice('Dycore module is initialized.')
@@ -154,40 +138,79 @@ contains
 !     if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
   end subroutine output
 
-  subroutine space_operators(state, tend)
+  subroutine space_operators(state, tend, pass)
     type(state_type), intent(inout) :: state
     type(tend_type), intent(inout) :: tend
+    integer, intent(in) :: pass 
     integer i, j
 
     call tend_diag_operator(state, tend)  
+    select case (pass)
+    case (all_pass)
+      call nonlinear_coriolis_operator(state, tend)
+      call energy_gradient_operator(state, tend)
+      call mass_divergence_operator(state, tend)
 
-    call nonlinear_coriolis_operator(state, tend)
-
-    call zonal_pressure_gradient_force_operator(state, tend)
-    call meridional_pressure_gradient_force_operator(state, tend)
-
-    call zonal_mass_divergence_operator(state, tend)
-    call meridional_mass_divergence_operator(state, tend)
-    call mass_divergence_operator(state, tend)
-
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) 
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+        do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+          tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) 
+        end do
       end do
-    end do
 
-    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j)
+      do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j)
+        end do
       end do
-    end do
 
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-!         tend%dgd(i,j) = tend%mass_div_lon(i,j) + tend%mass_div_lat(i,j)
-        tend%dgd(i,j) = tend%mass_div(i,j)
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          tend%dgd(i,j) = tend%mass_div(i,j)
+        end do
       end do
-    end do
+    case (slow_pass)
+#ifndef NDEBUG
+      tend%u_pgf = 0.0
+      tend%v_pgf = 0.0
+      tend%mass_div = 0.0
+#endif
+      call nonlinear_coriolis_operator(state, tend)
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+        do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+          tend%du(i,j) = tend%u_nonlinear(i,j) 
+        end do
+      end do
+      do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          tend%dv(i,j) = tend%v_nonlinear(i,j)
+        end do
+      end do
+      tend%dgd = 0.0
+    case (fast_pass)
+#ifndef NDEBUG
+      tend%u_nonlinear = 0.0
+      tend%v_nonlinear = 0.0
+#endif
+      call energy_gradient_operator(state, tend)
+      call mass_divergence_operator(state, tend)
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+        do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+          tend%du(i,j) = tend%u_pgf(i,j) 
+        end do
+      end do
+
+      do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          tend%dv(i,j) = tend%v_pgf(i,j) 
+        end do
+      end do
+
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          tend%dgd(i,j) = tend%mass_div(i,j)
+        end do
+      end do
+    end select
 
 !     call check_spaceoperator(tend, state)
 !     stop 'check!'
@@ -222,10 +245,10 @@ contains
     !! vertex potential vorticity 
     do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       r1 = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j)) / mesh%full_area(j)
-      r2 = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) - mesh%full_sin_lat(j-1)) / mesh%full_area(j-1)  
+      r2 = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) - mesh%full_sin_lat(j-1)) / mesh%full_area(j-1)   
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        up1 = state%u(i,j) * mesh%full_cos_lat(j)
-        um1 = state%u(i,j-1) * mesh%full_cos_lat(j-1)
+        up1 = state%u(i,j) !* mesh%full_cos_lat(j)
+        um1 = state%u(i,j-1) !* mesh%full_cos_lat(j-1)
         vm1 = state%v(i,j)
         vp1 = state%v(i+1,j)
         tend%diag%hd_corner(i,j) = 1.0 / mesh%half_area(j) *(r1 * mesh%full_area(j  ) * (state%gd(i,j  ) + state%gd(i+1,j  )) +&
@@ -435,68 +458,24 @@ contains
     if (allocated(q_u))    deallocate(q_u)
     if (allocated(q_v))    deallocate(q_v)
   end subroutine nonlinear_coriolis_operator
-
-  subroutine zonal_pressure_gradient_force_operator(state, tend)
-
+  
+  subroutine energy_gradient_operator(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
 
-    integer i, j
-
+    integer i,j
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         tend%u_pgf(i,j) = -(tend%diag%energy(i+1,j) - tend%diag%energy(i,j)) / coef%full_dlon(j)
       end do
     end do
 
-  end subroutine zonal_pressure_gradient_force_operator
-
-  subroutine meridional_pressure_gradient_force_operator(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-
-    integer i, j
-
     do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%v_pgf(i,j) = -(tend%diag%energy(i,j) - tend%diag%energy(i,j-1)) / coef%full_dlat(j) * mesh%full_cos_lat(j)
       end do
     end do
-
-  end subroutine meridional_pressure_gradient_force_operator
-
-  subroutine zonal_mass_divergence_operator(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-
-    integer i, j
-
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%mass_div_lon(i,j) = -(tend%diag%normal_u_flux(i,j) - tend%diag%normal_u_flux(i-1,j)) / coef%full_dlon(j)
-      end do
-    end do
-
-  end subroutine zonal_mass_divergence_operator
-
-  subroutine meridional_mass_divergence_operator(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-
-    real sp, np
-    integer i, j
-    
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%mass_div_lat(i,j) = -(mesh%half_cos_lat(j+1) * tend%diag%normal_v_flux(i,j+1) -&
-                                   mesh%half_cos_lat(j  ) * tend%diag%normal_v_flux(i,j  )) / coef%full_dlat(j)
-      end do
-    end do
-
-  end subroutine meridional_mass_divergence_operator
+  end subroutine energy_gradient_operator
 
   subroutine mass_divergence_operator(state, tend)
     type(state_type), intent(in) :: state
@@ -547,16 +526,38 @@ contains
   end subroutine update_state
 
   subroutine time_integrate()
-      call integrator(time_step_size, old, new)
+    select case (split_scheme)
+    case(csp2)
+      call csp2_splitting()
+    case default
+      call integrator(time_step_size, old, new, all_pass)
+    end select
 
   end subroutine time_integrate
 
+  subroutine csp2_splitting()
+    real fast_dt
+    integer subcycle, t1, t2
 
-  subroutine predict_correct(time_step_size, old, new, qcon_modified_)
+    fast_dt = time_step_size / subcycles
+    t1 = 0 
+    t2 = old
+
+    call integrator(0.5 * time_step_size, old, t1, slow_pass)
+    do subcycle = 1, subcycles
+      call integrator(fast_dt, t1, t2, fast_pass)
+      call time_swap_indices(t1,t2)
+    end do 
+    call integrator(0.5 * time_step_size, t1, new, slow_pass)
+
+  end subroutine csp2_splitting
+
+  subroutine predict_correct(time_step_size, old, new, pass, qcon_modified_)
 
     real, intent(in) :: time_step_size
     integer, intent(in) :: old
     integer, intent(in) :: new
+    integer, intent(in) :: pass 
     logical, intent(in), optional :: qcon_modified_
 
     real dt, ip1, ip2, beta
@@ -564,15 +565,15 @@ contains
     dt = time_step_size * 0.5
 
     ! Do first predict step.
-    call space_operators(state(old), tend(old))
+    call space_operators(state(old), tend(old), pass)
     call update_state(dt, tend(old), state(old), state(new))
      
     ! Do second predict step.
-    call space_operators(state(new), tend(old))
+    call space_operators(state(new), tend(old), pass)
     call update_state(dt, tend(old), state(old), state(new))
 
     ! Do correct stepe
-    call space_operators(state(new), tend(new))
+    call space_operators(state(new), tend(new), pass)
     dt = time_step_size 
     call update_state(dt, tend(new), state(old), state(new))
 
@@ -582,7 +583,7 @@ contains
     type(tend_type), intent(in) :: tend
     type(state_type), intent(in) :: state
     integer :: i, j
-    real hh0, hh1, div
+    real hh0, hh1
 
     real ip_egf
     real ip_fv 
@@ -616,9 +617,9 @@ contains
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        div = tend%mass_div_lon(i,j) + tend%mass_div_lat(i,j)
-        ip_energy_div = ip_energy_div + (tend%diag%kinetic_energy(i,j) + state%gd(i,j) + static%ghs(i,j)) * div * mesh%full_cos_lat(j)
-        ip_mass_div = ip_mass_div + div * mesh%full_cos_lat(j) 
+!         ip_energy_div = ip_energy_div + (tend%diag%kinetic_energy(i,j) + state%gd(i,j) + static%ghs(i,j)) * tend%mass_div(i,j)  * mesh%full_cos_lat(j)
+        ip_energy_div = ip_energy_div + tend%diag%energy(i,j) * tend%mass_div(i,j)  * mesh%full_cos_lat(j)
+        ip_mass_div = ip_mass_div + tend%mass_div(i,j)  * mesh%full_cos_lat(j) 
       end do
     end do
     print*, 'nonlinear Coriolis:    ' ,' total energy transfer tendency:', '      total mass tendency:'
