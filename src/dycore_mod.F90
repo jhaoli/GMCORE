@@ -181,11 +181,9 @@ contains
 
     call nonlinear_coriolis_operator(state, tend)
 
-    call zonal_pressure_gradient_force_operator(state, tend)
-    call meridional_pressure_gradient_force_operator(state, tend)
+    call energy_gradient_operator(state, tend)
 
-    call zonal_mass_divergence_operator(state, tend)
-    call meridional_mass_divergence_operator(state, tend)
+    call mass_divergence_operator(state, tend)
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
@@ -555,8 +553,7 @@ contains
     if (allocated(q_v))    deallocate(q_v)
   end subroutine nonlinear_coriolis_operator
 
-  subroutine zonal_pressure_gradient_force_operator(state, tend)
-
+  subroutine energy_gradient_operator(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
 
@@ -568,45 +565,26 @@ contains
       end do
     end do
 
-  end subroutine zonal_pressure_gradient_force_operator
-
-  subroutine meridional_pressure_gradient_force_operator(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-
-    integer i, j
-
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%v_pgf(i,j) = -(tend%diag%energy(i,j+1) - tend%diag%energy(i,j)) / coef%full_dlat(j) * mesh%full_cos_lat(j)
       end do
     end do
+  end subroutine energy_gradient_operator
 
-  end subroutine meridional_pressure_gradient_force_operator
-
-  subroutine zonal_mass_divergence_operator(state, tend)
+  subroutine mass_divergence_operator(state, tend)
 
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
 
     integer i, j
+    real sp, np
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%mass_div_lon(i,j) = -(tend%diag%normal_u_flux(i,j) - tend%diag%normal_u_flux(i-1,j)) / coef%full_dlon(j)
       end do
     end do
-
-  end subroutine zonal_mass_divergence_operator
-
-  subroutine meridional_mass_divergence_operator(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-
-    real sp, np
-    integer i, j
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
@@ -639,8 +617,7 @@ contains
         tend%mass_div_lat(i,j) = np
       end do
     end if
-
-  end subroutine meridional_mass_divergence_operator
+  end subroutine mass_divergence_operator
 
   subroutine update_state(dt, tend, old_state, new_state)
 
