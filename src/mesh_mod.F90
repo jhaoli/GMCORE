@@ -116,16 +116,15 @@ contains
     mesh%half_sin_lat(mesh%num_half_lat) = 1.0
 
 ! approximatly calculate the cell area   
-!     do j = 2, mesh%num_full_lat-1
+!     do j = 1, mesh%num_full_lat
 !       mesh%full_area(j) = radius**2 * mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat
 !     end do
-!     mesh%full_area(1) = radius**2 * mesh%half_cos_lat(1) * mesh%dlon * mesh%dlat * 0.25
-!     mesh%full_area(mesh%num_full_lat) = radius**2 * mesh%half_cos_lat(mesh%num_half_lat) * mesh%dlon * mesh%dlat * 0.25 
-  
-!     do j = 1, mesh%num_half_lat
+    
+!     do j = 2, mesh%num_half_lat-1
 !       mesh%half_area(j) = radius**2 * mesh%half_cos_lat(j) * mesh%dlon * mesh%dlat
 !     end do 
-
+!     mesh%half_area(1) = radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
+!     mesh%half_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
 !  integrate compute the cell area
     do j = 1, mesh%num_full_lat
       mesh%full_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j))

@@ -151,7 +151,7 @@ contains
 !     call history_write(state, static, diag)
  
 !     if (time_is_alerted('restart.output')) call restart_write(state, static)
-    if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
+!     if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
   end subroutine output
 
   subroutine space_operators(state, tend)
@@ -168,6 +168,7 @@ contains
 
     call zonal_mass_divergence_operator(state, tend)
     call meridional_mass_divergence_operator(state, tend)
+    call mass_divergence_operator(state, tend)
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
@@ -183,11 +184,12 @@ contains
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%dgd(i,j) = tend%mass_div_lon(i,j) + tend%mass_div_lat(i,j)
+!         tend%dgd(i,j) = tend%mass_div_lon(i,j) + tend%mass_div_lat(i,j)
+        tend%dgd(i,j) = tend%mass_div(i,j)
       end do
     end do
 
-    call check_spaceoperator(tend, state)
+!     call check_spaceoperator(tend, state)
 !     stop 'check!'
   end subroutine space_operators
 
@@ -228,7 +230,10 @@ contains
         vp1 = state%v(i+1,j)
         tend%diag%hd_corner(i,j) = 1.0 / mesh%half_area(j) *(r1 * mesh%full_area(j  ) * (state%gd(i,j  ) + state%gd(i+1,j  )) +&
                                                              r2 * mesh%full_area(j-1) * (state%gd(i,j-1) + state%gd(i+1,j-1))) / g 
-        tend%diag%pot_vor(i,j) = ((vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
+!         tend%diag%pot_vor(i,j) = ((vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
+        tend%diag%pot_vor(i,j) = ((um1 * radius * mesh%full_cos_lat(j-1) * mesh%dlon + vp1 * radius * mesh%dlat -&
+                                   up1 * radius * mesh%full_cos_lat(j  ) * mesh%dlon - vm1 * radius * mesh%dlat ) / mesh%half_area(j) +&
+                                   coef%half_f(j) ) / tend%diag%hd_corner(i,j)
       end do
     end do
 
@@ -276,15 +281,22 @@ contains
     
     !! kinetic energy on primal cell center 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      r1 = 0.25 * radius**2 * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j)) * mesh%dlon 
+!       r1 = 0.25 * radius**2 * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j)) * mesh%dlon 
+!       r2 = r1
+!       r3 = 0.5 * radius**2 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j)) * mesh%dlon 
+!       r4 = 0.5 * radius**2 * (mesh%full_sin_lat(j  ) - mesh%half_sin_lat(j)) * mesh%dlon
+      r1 = radius**2 * 0.5 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j  )) * mesh%full_cos_lat(j) / (mesh%full_cos_lat(j) + mesh%half_cos_lat(j+1)) +&
+           radius**2 * 0.5 * mesh%dlon * (mesh%full_sin_lat(j  ) - mesh%half_sin_lat(j)) * mesh%full_cos_lat(j) / (mesh%full_cos_lat(j) + mesh%half_cos_lat(j))
       r2 = r1
-      r3 = 0.5 * radius**2 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j  )) * mesh%dlon 
-      r4 = 0.5 * radius**2 * (mesh%full_sin_lat(j  ) - mesh%half_sin_lat(j)) * mesh%dlon
+      r3 = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j  )) * mesh%half_cos_lat(j+1) / (mesh%half_cos_lat(j+1) + mesh%full_cos_lat(j  ))
+      r4 = radius**2 * mesh%dlon * (mesh%full_sin_lat(j  ) - mesh%half_sin_lat(j)) * mesh%half_cos_lat(j) / (mesh%full_cos_lat(j  ) + mesh%half_cos_lat(j))
+     
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx                                           
         tend%diag%kinetic_energy(i,j) = 1.0 / mesh%full_area(j) * (r1 * state%u(i,j  )**2 + r2 * state%u(i-1,j)**2 +&
                                                                    r3 * state%v(i,j+1)**2 + r4 * state%v(i,j  )**2) 
       end do 
     end do
+
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%diag%energy(i,j) = tend%diag%kinetic_energy(i,j) + state%gd(i,j) + static%ghs(i,j)
@@ -325,7 +337,6 @@ contains
     real, allocatable :: q_u(:,:), q_v(:,:)
     real :: r1, r2
     real :: dt, dx, dy, hh0, alpha
-    real, parameter :: lat0= 90
     real :: full_beta(parallel%full_lat_start_idx: parallel%full_lat_end_idx)
     real :: half_beta(parallel%half_lat_start_idx_no_pole: parallel%half_lat_end_idx_no_pole)
 
@@ -409,10 +420,9 @@ contains
                                                tend%diag%normal_v_flux(i+1,j+1) * (q_u(i,j) + q_v(i+1,j+1))) +&
                                          r2 * (tend%diag%normal_v_flux(i,j    ) * (q_u(i,j) + q_v(i,j    ))  +&
                                                tend%diag%normal_v_flux(i+1,j  ) * (q_u(i,j) + q_v(i+1,j  ))) )
-        
       end do
-    end do
-    
+    end do      
+
     do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%v_nonlinear(i,j) = -0.125 * (tend%diag%normal_u_flux(i-1,j  ) * (q_v(i,j) + q_u(i-1,j)) + &
@@ -487,6 +497,21 @@ contains
     end do
 
   end subroutine meridional_mass_divergence_operator
+
+  subroutine mass_divergence_operator(state, tend)
+    type(state_type), intent(in) :: state
+    type(tend_type), intent(inout) :: tend
+    integer :: i, j
+
+    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+        tend%mass_div(i,j) = -1.0 / mesh%full_area(j) * (radius * mesh%dlat * tend%diag%normal_u_flux(i,j) -&
+                                                         radius * mesh%dlat * tend%diag%normal_u_flux(i-1,j) +&
+                                                         radius * mesh%half_cos_lat(j+1) * mesh%dlon * tend%diag%normal_v_flux(i,j+1) -&
+                                                         radius * mesh%half_cos_lat(j  ) * mesh%dlon * tend%diag%normal_v_flux(i,j  ))
+      end do 
+    end do 
+  end subroutine mass_divergence_operator
 
   subroutine update_state(dt, tend, old_state, new_state)
 
