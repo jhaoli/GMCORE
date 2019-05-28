@@ -81,15 +81,15 @@ contains
       mesh%half_lon_deg(i) = mesh%half_lon(i) * rad_to_deg
     end do
 
-    mesh%dlat = pi / mesh%num_half_lat
-    do j = 1, mesh%num_half_lat
-      mesh%full_lat(j) = - 0.5 * pi + (j - 1) * mesh%dlat
-      mesh%half_lat(j) = mesh%full_lat(j) + 0.5 * mesh%dlat
+    mesh%dlat = pi / mesh%num_full_lat
+    do j = 1, mesh%num_full_lat
+      mesh%half_lat(j) = - 0.5 * pi + (j - 1) * mesh%dlat
+      mesh%full_lat(j) = mesh%half_lat(j) + 0.5 * mesh%dlat
       mesh%full_lat_deg(j) = mesh%full_lat(j) * rad_to_deg
       mesh%half_lat_deg(j) = mesh%half_lat(j) * rad_to_deg
     end do
-    mesh%full_lat(num_lat) = 0.5 * pi
-    mesh%full_lat_deg(num_lat) = 90.0
+    mesh%half_lat(mesh%num_half_lat) = 0.5 * pi
+    mesh%half_lat_deg(mesh%num_half_lat) = 90.0
 
     do i = 1, mesh%num_full_lon
       mesh%full_cos_lon(i) = cos(mesh%full_lon(i))
@@ -110,10 +110,10 @@ contains
       mesh%full_cos_lat(j) = cos(mesh%full_lat(j))
       mesh%full_sin_lat(j) = sin(mesh%full_lat(j))
     end do
-    mesh%full_cos_lat(1) = 0.0
-    mesh%full_cos_lat(mesh%num_full_lat) = 0.0
-    mesh%full_sin_lat(1) = -1.0
-    mesh%full_sin_lat(mesh%num_full_lat) = 1.0
+    mesh%half_cos_lat(1) = 0.0
+    mesh%half_cos_lat(mesh%num_half_lat) = 0.0
+    mesh%half_sin_lat(1) = -1.0
+    mesh%half_sin_lat(mesh%num_half_lat) = 1.0
 
 ! approximatly calculate the cell area   
 !     do j = 2, mesh%num_full_lat-1
@@ -127,15 +127,16 @@ contains
 !     end do 
 
 !  integrate compute the cell area
-    do j = 2, mesh%num_full_lat-1
-      mesh%full_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j) - mesh%half_sin_lat(j-1))
+    do j = 1, mesh%num_full_lat
+      mesh%full_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j))
     end do
-    mesh%full_area(1) = radius**2 * mesh%dlon * ( mesh%half_sin_lat(1) + 1)
-    mesh%full_area(mesh%num_full_lat) = radius**2 * mesh%dlon * (1 - mesh%half_sin_lat(mesh%num_full_lat-1))
- 
-    do j = 1, mesh%num_half_lat
-      mesh%half_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j+1) - mesh%full_sin_lat(j))
+     
+    do j = 2, mesh%num_half_lat-1
+      mesh%half_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j) - mesh%full_sin_lat(j-1))
     end do
+    mesh%half_area(1) = radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
+    mesh%half_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
+
 !     print*, 'total primal area:', sum(mesh%full_area)*180
 !     print*, 'total   dual area:', sum(mesh%half_area)*180
 !     print*, 'the earth    area:', 4 * pi * radius**2

@@ -51,7 +51,7 @@ contains
     if (smooth_mountain) then
       do k = 1, 30
         call parallel_fill_halo(static%ghs, all_halo=.true.)
-        do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+        do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
           do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
             static%ghs(i,j) = static%ghs(i,j) + &
               (0.5  / 4) * (static%ghs(i-1,j  ) + static%ghs(i,  j+1) + static%ghs(i+1,j  ) + static%ghs(i,  j-1) - 4 * static%ghs(i,j)) + &
@@ -63,7 +63,7 @@ contains
 
     call parallel_fill_halo(static%ghs, all_halo=.true.)
 
-    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       cos_lat = mesh%full_cos_lat(j)
       sin_lat = mesh%full_sin_lat(j)
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx

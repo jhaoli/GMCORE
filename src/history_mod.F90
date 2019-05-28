@@ -45,8 +45,8 @@ contains
     call io_add_var('v',    long_name='v wind component',     units='m s-1',  dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('gh',   long_name='geopotential height',  units='m2 s-2', dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('ghs',  long_name='surface geopotential', units='m2 s-2', dim_names=['lon ', 'lat ', 'time'])
-    call io_add_var('vor',  long_name='relative vorticity',   units='s-1',    dim_names=['ilon', 'lat ', 'time'])
-    call io_add_var('div',  long_name='divergence',           units='s-1',    dim_names=['lon ', 'ilat', 'time'])
+    call io_add_var('vor',  long_name='relative vorticity',   units='s-1',    dim_names=['ilon', 'ilat', 'time'])
+    call io_add_var('div',  long_name='divergence',           units='s-1',    dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('te',   long_name='total energy',         units='m4 s-4', dim_names=['time'])
     call io_add_var('tm',   long_name='total mass',           units='m2 s-2', dim_names=['time'])
     call io_add_var('tes',  long_name='total enstrophy',      units='m-1 s-2',dim_names=['time'])
@@ -111,7 +111,7 @@ contains
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         u(i,j) = 0.5 * (state%u(i,j) + state%u(i-1,j))
-        v(i,j) = 0.5 * (state%v(i,j) + state%v(i,j-1))
+        v(i,j) = 0.5 * (state%v(i,j+1) + state%v(i,j))
         gh(i,j) = state%gd(i,j) + static%ghs(i,j)
       end do
     end do
@@ -121,8 +121,8 @@ contains
     call io_output('lat',   mesh%full_lat_deg(:))
     call io_output('ilon',  mesh%half_lon_deg(:))
     call io_output('ilat',  mesh%half_lat_deg(:))
-    call io_output('u',     u(1:mesh%num_half_lon,1:mesh%num_full_lat))
-    call io_output('v',     v(1:mesh%num_full_lon,1:mesh%num_half_lat))
+    call io_output('u',     u(1:mesh%num_full_lon,1:mesh%num_full_lat))
+    call io_output('v',     v(1:mesh%num_full_lon,1:mesh%num_full_lat))
     call io_output('gh',    gh(1:mesh%num_full_lon,1:mesh%num_full_lat))
     call io_output('ghs',   static%ghs(1:mesh%num_full_lon,1:mesh%num_full_lat))
     call io_output('vor',   diag%vor(1:mesh%num_half_lon,1:mesh%num_half_lat))

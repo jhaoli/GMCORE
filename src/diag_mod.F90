@@ -46,27 +46,52 @@ contains
 
     real vm1, vp1, um1, up1
     integer i, j
+    real sp, np, area_pole
 
-    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         um1 = state%u(i-1,j)
         up1 = state%u(i,j)
-        vm1 = state%v(i,j-1) * mesh%half_cos_lat(j-1)
-        vp1 = state%v(i,j) * mesh%half_cos_lat(j)
+        vm1 = state%v(i,j) * mesh%half_cos_lat(j)
+        vp1 = state%v(i,j+1) * mesh%half_cos_lat(j+1)
         diag%div(i,j) = (up1 - um1) / coef%full_dlon(j) + (vp1 - vm1) / coef%full_dlat(j)
       end do
     end do
     call parallel_fill_halo(diag%div, all_halo=.true.)
 
-    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        um1 = state%u(i,j) * mesh%full_cos_lat(j)
-        up1 = state%u(i,j+1) * mesh%full_cos_lat(j+1)
+        um1 = state%u(i,j-1) * mesh%full_cos_lat(j-1)
+        up1 = state%u(i,j) * mesh%full_cos_lat(j)
         vm1 = state%v(i,j)
         vp1 = state%v(i+1,j)
         diag%vor(i,j) = (vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j)
       end do
     end do
+    
+    j = parallel%half_lat_start_idx
+    sp = 0.0
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      sp = sp - state%u(i,j) * radius * mesh%full_cos_lat(j) * mesh%dlon
+    end do 
+!     area_pole = mesh%num_full_lon * 0.5 * mesh%dlon * mesh%dlat * radius**2 * mesh%full_cos_lat(j)
+!     area_pole = radius**2 * 2 * pi * (1 - mesh%full_sin_lat(j))
+    area_pole = radius**2 * pi * (mesh%dlat * 0.5)**2
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      diag%vor(i,j) = sp / area_pole 
+    end do 
+
+    j = parallel%half_lat_end_idx
+    np = 0.0
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      np = np + state%u(i,j-1) * radius * mesh%full_cos_lat(j-1) * mesh%dlon
+    end do 
+!     area_pole = radius**2 * 2 * pi *(1- mesh%full_sin_lat(j-1))
+    area_pole = radius**2 * pi * (mesh%dlat * 0.5)**2
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      diag%vor(i,j) = np / area_pole 
+    end do   
+
     call parallel_fill_halo(diag%vor, all_halo=.true.)
 
     diag%total_mass = 0.0
@@ -108,12 +133,12 @@ contains
     integer i, j
 
     res = 0.0
-    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         res = res + state%u(i,j)**2 * mesh%full_cos_lat(j)
       end do
     end do
-    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         res = res + state%v(i,j)**2 * mesh%half_cos_lat(j)
       end do
