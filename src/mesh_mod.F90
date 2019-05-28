@@ -133,7 +133,7 @@ contains
     do j = 2, mesh%num_half_lat-1
       mesh%half_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j) - mesh%full_sin_lat(j-1))
     end do
-    mesh%half_area(1) = radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
+    mesh%half_area(1) = radius**2 * mesh%dlon * (mesh%full_sin_lat(1) + 1)
     mesh%half_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
     
 !     print*, 'total primal area:', sum(mesh%full_area)*180

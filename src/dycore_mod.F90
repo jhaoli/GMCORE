@@ -332,14 +332,20 @@ contains
         r2 = mesh%half_cos_lat(j) / mesh%full_cos_lat(j)
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         tend%diag%tangential_u_flux(i,j) = 0.125 *(r1 * ((state%gd(i,j) + state%gd(i,j+1)) * state%v(i,j+1) + (state%gd(i+1,j) + state%gd(i+1,j+1)) * state%v(i+1,j+1)) + &
-                                                   r2 * ((state%gd(i,j) + state%gd(i,j-1)) * state%v(i,j  ) + (state%gd(i+1,j) + state%gd(i+1,j-1)) * state%v(i+1,j))) / g  
+                                                   r2 * ((state%gd(i,j) + state%gd(i,j-1)) * state%v(i,j  ) + (state%gd(i+1,j-1) + state%gd(i+1,j)) * state%v(i+1,j))) / g  
       end do 
     end do 
 
     do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%tangential_v_flux(i,j) = 0.125 * ((state%gd(i-1,j  ) + state%gd(i,  j)) * state%u(i-1,j) + (state%gd(i-1,j-1) + state%gd(i,j-1 )) * state%u(i-1,j-1) +&
-                                                    (state%gd(i,j) + state%gd(i+1,j)) * state%u(i,j) + (state%gd(i,j-1) + state%gd(i+1,j-1)) * state%u(i,j-1 )) / g  
+        if (j == parallel%half_lat_start_idx) then
+          tend%diag%tangential_v_flux(i,j) = 0.0
+        elseif (j == parallel%half_lon_end_idx) then
+          tend%diag%tangential_v_flux(i,j) = 0.0
+        else 
+          tend%diag%tangential_v_flux(i,j) = 0.125 * ((state%gd(i-1,j) + state%gd(i,  j)) * state%u(i-1,j) + (state%gd(i-1,j-1) + state%gd(i,j-1  )) * state%u(i-1,j-1) +&
+                                                      (state%gd(i,j  ) + state%gd(i+1,j)) * state%u(i,j  ) + (state%gd(i,j-1  ) + state%gd(i+1,j-1)) * state%u(i,j-1 )) / g  
+        end if 
       end do 
     end do 
 
@@ -359,25 +365,26 @@ contains
     integer :: i, j
     real, allocatable :: q_u(:,:), q_v(:,:)
     real :: r1, r2
+    real, parameter :: lat0 = -90
     real :: dt, dx, dy, hh0, alpha
     real :: full_beta(parallel%full_lat_start_idx: parallel%full_lat_end_idx)
-    real :: half_beta(parallel%half_lat_start_idx_no_pole: parallel%half_lat_end_idx_no_pole)
+    real :: half_beta(parallel%half_lat_start_idx: parallel%half_lat_end_idx)
 
     if (.not. allocated(q_u))    call parallel_allocate(q_u, half_lon=.true.)
     if (.not. allocated(q_v))    call parallel_allocate(q_v, half_lat=.true.)
 
 !！（1） average nethod 
-    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        q_v(i,j) = 0.5 * (tend%diag%pot_vor(i-1,j) + tend%diag%pot_vor(i,j))
-      end do 
-    end do 
+!     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+!       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+!         q_v(i,j) = 0.5 * (tend%diag%pot_vor(i-1,j) + tend%diag%pot_vor(i,j))
+!       end do 
+!     end do 
 
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j+1) + tend%diag%pot_vor(i,j))
-      end do 
-    end do 
+!     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+!       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+!         q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j+1) + tend%diag%pot_vor(i,j))
+!       end do 
+!     end do 
 
 !!(2) replaced by upwind  
 !     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
@@ -395,42 +402,42 @@ contains
 !         end if 
 !       end do 
 !     end do 
-!     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+!     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
 !       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
 !         if (mesh%full_lat_deg(j) < -1.0 * lat0 .or. mesh%full_lat_deg(j) > lat0) then
 !           if (tend%diag%tangential_u_flux(i,j) > 0) then
-!             q_u(i,j) = tend%diag%pot_vor(i,j-1)
-!           elseif (tend%diag%tangential_u_flux(i,j) < 0) then
 !             q_u(i,j) = tend%diag%pot_vor(i,j)
+!           elseif (tend%diag%tangential_u_flux(i,j) < 0) then
+!             q_u(i,j) = tend%diag%pot_vor(i,j+1)
 !           else
-!             q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j-1))
+!             q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j+1))
 !           end if
 !         else
-!           q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j-1))
+!           q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j+1))
 !         end if 
 !       end do 
 !     end do 
 !! (3) upwind intepolation with parameter-beta
-!       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-!         full_beta(j) = 4 / pi**2 * mesh%full_lat(j)**2
-!       end do
-!       do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-!         half_beta(j) = 4 / pi**2 * mesh%half_lat(j)**2
-!       end do
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+        full_beta(j) = 4 / pi**2 * mesh%full_lat(j)**2
+      end do
+      do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+        half_beta(j) = 4 / pi**2 * mesh%half_lat(j)**2
+      end do
 
-!       do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-!         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-!           q_v(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i-1,j)) - &
-!                     half_beta(j) * 0.5 * sign(1.0, tend%diag%tangential_v_flux(i,j)) * (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) 
-!         end do 
-!       end do 
+      do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          q_v(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i-1,j)) - &
+                    half_beta(j) * 0.5 * sign(1.0, tend%diag%tangential_v_flux(i,j)) * (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) 
+        end do 
+      end do 
 
-!       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-!        do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-!           q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j+1) + tend%diag%pot_vor(i,j)) - &
-!                   full_beta(j) * 0.5 * sign(1.0, tend%diag%tangential_u_flux(i,j)) * (tend%diag%pot_vor(i,j+1) - tend%diag%pot_vor(i,j))
-!        end do 
-!       end do
+      do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+          q_u(i,j) = 0.5 * (tend%diag%pot_vor(i,j+1) + tend%diag%pot_vor(i,j)) - &
+                  full_beta(j) * 0.5 * sign(1.0, tend%diag%tangential_u_flux(i,j)) * (tend%diag%pot_vor(i,j+1) - tend%diag%pot_vor(i,j))
+       end do 
+      end do
     
     call parallel_fill_halo(q_u, all_halo = .true.)
     call parallel_fill_halo(q_v, all_halo = .true.)
@@ -618,7 +625,7 @@ contains
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
 !         ip_energy_div = ip_energy_div + (tend%diag%kinetic_energy(i,j) + state%gd(i,j) + static%ghs(i,j)) * tend%mass_div(i,j)  * mesh%full_cos_lat(j)
-        ip_energy_div = ip_energy_div + tend%diag%energy(i,j) * tend%mass_div(i,j)  * mesh%full_cos_lat(j)
+        ip_energy_div = ip_energy_div + tend%diag%energy(i,j) * tend%mass_div(i,j) * mesh%full_cos_lat(j)
         ip_mass_div = ip_mass_div + tend%mass_div(i,j)  * mesh%full_cos_lat(j) 
       end do
     end do
