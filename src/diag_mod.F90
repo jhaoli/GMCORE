@@ -25,6 +25,7 @@ module diag_mod
     real total_enstrophy
     real, allocatable :: vor(:,:)
     real, allocatable :: div(:,:)
+    real, allocatable :: pv(:,:)
   end type diag_type
 
   type(diag_type) diag
@@ -34,6 +35,7 @@ contains
   subroutine diag_init()
 
     if (.not. allocated(diag%vor)) call parallel_allocate(diag%vor, half_lon=.true., half_lat=.true.)
+    if (.not. allocated(diag%pv))  call parallel_allocate(diag%pv, half_lon=.true., half_lat=.true.)
     if (.not. allocated(diag%div)) call parallel_allocate(diag%div)
 
     call log_notice('Diag module is initialized.')
@@ -59,41 +61,6 @@ contains
     end do
     call parallel_fill_halo(diag%div, all_halo=.true.)
 
-    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        um1 = state%u(i,j-1) * mesh%full_cos_lat(j-1)
-        up1 = state%u(i,j) * mesh%full_cos_lat(j)
-        vm1 = state%v(i,j)
-        vp1 = state%v(i+1,j)
-        diag%vor(i,j) = (vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j)
-      end do
-    end do
-    
-    j = parallel%half_lat_start_idx
-    sp = 0.0
-    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-      sp = sp - state%u(i,j) * radius * mesh%full_cos_lat(j) * mesh%dlon
-    end do 
-!     area_pole = mesh%num_full_lon * 0.5 * mesh%dlon * mesh%dlat * radius**2 * mesh%full_cos_lat(j)
-!     area_pole = radius**2 * 2 * pi * (1 - mesh%full_sin_lat(j))
-    area_pole = radius**2 * pi * (mesh%dlat * 0.5)**2
-    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-      diag%vor(i,j) = sp / area_pole 
-    end do 
-
-    j = parallel%half_lat_end_idx
-    np = 0.0
-    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-      np = np + state%u(i,j-1) * radius * mesh%full_cos_lat(j-1) * mesh%dlon
-    end do 
-!     area_pole = radius**2 * 2 * pi *(1- mesh%full_sin_lat(j-1))
-    area_pole = radius**2 * pi * (mesh%dlat * 0.5)**2
-    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-      diag%vor(i,j) = np / area_pole 
-    end do   
-
-    call parallel_fill_halo(diag%vor, all_halo=.true.)
-
     diag%total_mass = 0.0
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
@@ -112,7 +79,6 @@ contains
       call log_error('Total energy is NaN!')
     end if
 
-    diag%total_enstrophy = diag_total_enstophy(state)
     if (ieee_is_nan(diag%total_enstrophy)) then
       call log_error('Total potential enstrophy is NaN!')
     end if
@@ -123,8 +89,9 @@ contains
 
     if (allocated(diag%vor)) deallocate(diag%vor)
     if (allocated(diag%div)) deallocate(diag%div)
-
+    if (allocated(diag%pv)) deallocate(diag%pv)
   end subroutine diag_final
+    
 
   real function diag_total_energy(state) result(res)
 
@@ -151,64 +118,4 @@ contains
 
   end function diag_total_energy
 
-  real function diag_total_enstophy(state) result(res)
-
-    type(state_type), intent(in) :: state
-
-    integer i, j
-    real r1, r2, um1, up1, vm1, vp1
-    real :: hd_corner(parallel%half_lon_start_idx: parallel%half_lon_end_idx, &
-                      parallel%half_lat_start_idx: parallel%half_lat_end_idx)
-    real :: pot_vor(parallel%half_lon_start_idx: parallel%half_lon_end_idx, &
-                    parallel%half_lat_start_idx: parallel%half_lat_end_idx)
-    res = 0.0
-    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-      r1 = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) - mesh%full_sin_lat(j)) / mesh%full_area(j)
-      r2 = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j+1) - mesh%half_sin_lat(j)) / mesh%full_area(j+1)  
-
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        um1 = state%u(i,j) * mesh%full_cos_lat(j)
-        up1 = state%u(i,j+1) * mesh%full_cos_lat(j+1)
-        vm1 = state%v(i,j)
-        vp1 = state%v(i+1,j)
-        hd_corner(i,j) = 1 / mesh%half_area(j) *( r1 * mesh%full_area(j  ) * (state%gd(i,j  ) + state%gd(i+1,j  )) +&
-                                                            r2 * mesh%full_area(j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1))) / g 
-        pot_vor(i,j) = ((vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j) + coef%half_f(j)) / hd_corner(i,j)
-        res = res + 0.5 * hd_corner(i,j) * pot_vor(i,j)**2 * mesh%half_cos_lat(j)
-      end do
-    end do
-  
-    if (parallel%has_south_pole) then
-      j = parallel%half_lat_south_pole_idx
-      r1 = 0.5 
-      r2 = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j+1) - mesh%half_sin_lat(j)) / mesh%full_area(j+1)
-
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        um1 = state%u(i,j) * mesh%full_cos_lat(j)
-        up1 = state%u(i,j+1) * mesh%full_cos_lat(j+1)
-        vm1 = state%v(i,j)
-        vp1 = state%v(i+1,j)
-        hd_corner(i,j) = 1 / mesh%half_area(j) * (r1 * mesh%full_area(j  ) * (state%gd(i,j  ) + state%gd(i+1,j  )) +&
-                                                            r2 * mesh%full_area(j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1))) / g 
-        pot_vor(i,j) = ((vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j) + coef%half_f(j)) / hd_corner(i,j)
-        res = res + 0.5 * hd_corner(i,j) * pot_vor(i,j)**2 * mesh%half_cos_lat(j)
-      end do                                       
-    end if
-     
-    if (parallel%has_north_pole) then
-      j = parallel%half_lat_north_pole_idx 
-      r1 = 0.5 
-      r2 = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) - mesh%full_sin_lat(j)) / mesh%full_area(j)
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        um1 = state%u(i,j) * mesh%full_cos_lat(j)
-        up1 = state%u(i,j+1) * mesh%full_cos_lat(j+1)
-        vm1 = state%v(i,j)
-        vp1 = state%v(i+1,j)
-        hd_corner(i,j) = 1 / mesh%half_area(j) * (r1 * mesh%full_area(j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1)) +&
-                                                            r2 * mesh%full_area(j) * (state%gd(i,j) + state%gd(i+1,j))) / g 
-        pot_vor(i,j) = ((vp1 - vm1) / coef%half_dlon(j) - (up1 - um1) / coef%half_dlat(j) + coef%half_f(j)) / hd_corner(i,j)
-        res = res + 0.5 * hd_corner(i,j) * pot_vor(i,j)**2 * mesh%half_cos_lat(j)
-      end do                                       
-    end if
-  end function diag_total_enstophy 
 end module diag_mod
