@@ -36,6 +36,7 @@ module params_mod
   ! Options:
   ! - predict-correct
   ! - runge-kutta
+  integer pv_scheme ! 1-middle point 2-upwind with beta
   character(30) time_scheme ! Time integration scheme
   integer time_order ! Time integration order (different schemes will have different meanings)
   logical qcon_modified ! Switch whether quadratic conservation modification is added
@@ -80,6 +81,7 @@ module params_mod
     history_periods, &
     restart_period, &
     restart_file, &
+    pv_scheme,&
     time_scheme, &
     time_order, &
     qcon_modified, &
