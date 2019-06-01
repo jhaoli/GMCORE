@@ -36,12 +36,11 @@ module mesh_mod
     real, allocatable :: full_lat_deg(:)
     real, allocatable :: half_lat_deg(:)
     ! Area for weighting
-    real, allocatable :: cell_area(:) ! for primal grid
-    real, allocatable :: vertex_area(:) ! for dual gird 
+    real, allocatable :: cell_area(:) 
+    real, allocatable :: vertex_area(:)  
     real, allocatable :: lon_edge_area(:)
     real, allocatable :: lat_edge_area(:)
     real, allocatable :: subcell_area(:,:)
-    real global_area
   end type mesh_type
 
   type(mesh_type) mesh
@@ -125,14 +124,14 @@ contains
 
 ! approximatly calculate the cell area   
 !     do j = 1, mesh%num_full_lat
-!       mesh%full_area(j) = radius**2 * mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat
+!       mesh%cell_area(j) = radius**2 * mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat
 !     end do
     
 !     do j = 2, mesh%num_half_lat-1
-!       mesh%half_area(j) = radius**2 * mesh%half_cos_lat(j) * mesh%dlon * mesh%dlat
+!       mesh%vertex_area(j) = radius**2 * mesh%half_cos_lat(j) * mesh%dlon * mesh%dlat
 !     end do 
-!     mesh%half_area(1) = radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
-!     mesh%half_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
+!     mesh%vertex_area(1) = radius**2 * pi *(mesh%dlat*0.5)**2 / mesh%num_full_lon !radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
+!     mesh%vertex_area(mesh%num_half_lat) = radius**2 * pi *(mesh%dlat*0.5)**2 / mesh%num_full_lon !radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
 !  integrate compute the cell area
     do j = 1, mesh%num_full_lat
       mesh%cell_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j))
@@ -144,9 +143,8 @@ contains
     mesh%vertex_area(1) = radius**2 * mesh%dlon * (mesh%full_sin_lat(1) + 1)
     mesh%vertex_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
     
-    mesh%global_area = sum(mesh%cell_area) * mesh%num_full_lon
-!     print*, 'total primal area:', sum(mesh%full_area)*180 
-!     print*, 'total   dual area:', sum(mesh%half_area)*180 
+!     print*, 'total primal area:', sum(mesh%cell_area)*mesh%num_full_lon
+!     print*, 'total   dual area:', sum(mesh%vertex_area)*mesh%num_full_lon 
 !     print*, 'the earth    area:', 4 * pi * radius**2
 !     stop 'mesh'
 
@@ -158,17 +156,13 @@ contains
     end do 
     mesh%lat_edge_area(1) = 0.0
     mesh%lat_edge_area(mesh%num_half_lat) = 0.0
-! check 
-!     do j = 1, mesh%num_full_lat
-! !       print*, 'lat:', mesh%full_lat_deg(j), 'mesh_full:',mesh%full_area(j), 'sum of areaEdge:', (mesh%full_areaEdge(j) * 2 + mesh%half_areaEdge(j+1) + mesh%half_areaEdge(j) ) * 0.25
-!       print*, 'lat:', mesh%full_lat_deg(j), (mesh%full_area(j) - (mesh%full_areaEdge(j) * 2 + mesh%half_areaEdge(j+1) + mesh%half_areaEdge(j) ) * 0.25) / mesh%full_area(j)
-!     end do 
-!     stop 'mesh'
+
     do j = 1, mesh%num_full_lat
       ! 1 for up, 2 for low
-      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j)) / mesh%cell_area(j)
-      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j)) / mesh%cell_area(j)
-    end do 
+      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j)) / mesh%vertex_area(j+1)
+      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j)) / mesh%vertex_area(j)
+    end do
+
     call log_notice('Mesh module is initialized.')
 
   end subroutine mesh_init
