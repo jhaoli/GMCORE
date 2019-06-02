@@ -158,10 +158,10 @@ contains
     mesh%lat_edge_area(mesh%num_half_lat) = 0.0
 
     do j = 1, mesh%num_full_lat
-      ! 1 for up, 2 for low
-      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j)) / mesh%vertex_area(j+1)
-      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j)) / mesh%vertex_area(j)
-    end do
+      ! 1 for up, 2 for down
+      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j)) / mesh%cell_area(j) !mesh%vertex_area(j+1)
+      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j)) / mesh%cell_area(j) !mesh%vertex_area(j)
+    end do 
 
     call log_notice('Mesh module is initialized.')
 

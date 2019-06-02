@@ -47,7 +47,9 @@ module types_mod
     real, allocatable :: normal_u_flux(:,:)
     real, allocatable :: normal_v_flux(:,:)
     real, allocatable :: tangential_u_flux(:,:)
-    real, allocatable :: tangential_v_flux(:,:)   
+    real, allocatable :: tangential_v_flux(:,:) 
+    real, allocatable :: pv_lon(:,:)
+    real, allocatable :: pv_lat(:,:)
   end type dia_type
 
   type tend_type
@@ -131,6 +133,8 @@ contains
     if (.not. allocated(tend%diag%normal_v_flux))  call parallel_allocate(tend%diag%normal_v_flux, half_lat=.true.)
     if (.not. allocated(tend%diag%tangential_u_flux))  call parallel_allocate(tend%diag%tangential_u_flux, half_lon=.true.)
     if (.not. allocated(tend%diag%tangential_v_flux))  call parallel_allocate(tend%diag%tangential_v_flux, half_lat=.true.)
+    if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.)
+    if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.)
   end subroutine allocate_tend_data
 
   subroutine deallocate_coef_data(coef)
@@ -186,6 +190,8 @@ contains
     if (allocated(tend%diag%normal_v_flux))  deallocate(tend%diag%normal_v_flux)
     if (allocated(tend%diag%tangential_u_flux))  deallocate(tend%diag%tangential_u_flux)
     if (allocated(tend%diag%tangential_v_flux))  deallocate(tend%diag%tangential_v_flux)
+    if (allocated(tend%diag%pv_lon))  deallocate(tend%diag%pv_lon)
+    if (allocated(tend%diag%pv_lat))  deallocate(tend%diag%pv_lat)
     end subroutine deallocate_tend_data
 
 
