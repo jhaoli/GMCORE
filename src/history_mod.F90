@@ -49,7 +49,7 @@ contains
     call io_add_var('div',  long_name='divergence',           units='s-1',    dim_names=['lon ', 'ilat', 'time'])
     call io_add_var('te',   long_name='total energy',         units='m4 s-4', dim_names=['time'])
     call io_add_var('tm',   long_name='total mass',           units='m2 s-2', dim_names=['time'])
-    call io_add_var('tes',  long_name='total enstrophy',      units='m-1 s-2',dim_names=['time'])
+    call io_add_var('tes',  long_name='total potential enstrophy',units='m-1 s-2',dim_names=['time'])
 
     call io_create_dataset(name='debug', desc=case_desc, file_prefix=case_name // '.debug')
     call io_add_dim('time', 'debug', add_var=.true.)

@@ -145,20 +145,22 @@ contains
 !     print*, 'total   dual area:', sum(mesh%half_area)*180
 !     print*, 'the earth    area:', 4 * pi * radius**2
 !     stop 'mesh'
-    do j = 1, mesh%num_full_lat
+    do j = 2, mesh%num_full_lat-1
       mesh%lon_edge_area(j) = radius**2 * mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat
     end do 
+      mesh%lon_edge_area(1) = 0.0
+      mesh%lon_edge_area(mesh%num_full_lat) = 0.0
     do j = 1, mesh%num_half_lat
       mesh%lat_edge_area(j) = radius**2 * mesh%half_cos_lat(j) * mesh%dlon * mesh%dlat 
     end do 
     do j = 2, mesh%num_full_lat-1
       ! 1 for up, 2 for low
-      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) - mesh%full_sin_lat(j)) / mesh%vertex_area(j)
-      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j-1)) / mesh%vertex_area(j-1)
+      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) - mesh%full_sin_lat(j)) / mesh%cell_area(j) 
+      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j-1)) / mesh%cell_area(j) 
     end do 
 
-    mesh%subcell_area(1,1) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(1) - mesh%full_sin_lat(1)) / mesh%vertex_area(1)
-    mesh%subcell_area(2,mesh%num_full_lat) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(mesh%num_full_lat) - mesh%half_sin_lat(mesh%num_full_lat-1)) / mesh%vertex_area(mesh%num_half_lat)
+    mesh%subcell_area(1,1) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(1) - mesh%full_sin_lat(1)) / mesh%cell_area(1) 
+    mesh%subcell_area(2,mesh%num_full_lat) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(mesh%num_full_lat) - mesh%half_sin_lat(mesh%num_full_lat-1)) / mesh%cell_area(mesh%num_full_lat) 
 
     call log_notice('Mesh module is initialized.')
 
