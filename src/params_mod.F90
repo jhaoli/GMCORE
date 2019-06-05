@@ -3,11 +3,15 @@ module params_mod
   implicit none
 
   ! Contant parameters
+  integer, parameter :: real_kind_4 = 4
+  integer, parameter :: real_kind_8 = 8
+  integer, parameter :: real_kind = real_kind_8
   real, parameter :: pi = atan(1.0) * 4.0
   real, parameter :: rad_to_deg = 180.0 / pi
   real, parameter :: deg_to_rad = pi / 180.0
   real, parameter :: omega = 2.0 * pi / 86400.0
-  real, parameter :: radius = 6.37122e6
+!   real, parameter :: radius = 6.37122e6
+  real, parameter :: radius = 1.0
   real, parameter :: g = 9.80616
 
   integer num_lon

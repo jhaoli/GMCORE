@@ -60,7 +60,7 @@ contains
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
 !         diag%total_mass = diag%total_mass + mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat * state%gd(i,j)
-        diag%total_mass = diag%total_mass + mesh%cell_area(j) * state%gd(i,j)
+        diag%total_mass = diag%total_mass + mesh%cell_area(j) * state%gd(i,j) / radius**2
       end do
     end do
     diag%total_mass = diag%total_mass * radius**2
@@ -97,18 +97,18 @@ contains
     res = 0.0
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        res = res + (state%gd(i+1,j) + state%gd(i,j)) / g * 0.5 * state%u(i,j)**2 * mesh%lon_edge_area(j)
+        res = res + (state%gd(i+1,j) + state%gd(i,j)) / g * 0.5 * state%u(i,j)**2 * mesh%lon_edge_area(j) / radius**2
       end do
     end do
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        res = res + (state%gd(i,j) + state%gd(i,j+1)) / g * 0.5 * state%v(i,j)**2 * mesh%lat_edge_area(j)
+        res = res + (state%gd(i,j) + state%gd(i,j+1)) / g * 0.5 * state%v(i,j)**2 * mesh%lat_edge_area(j) / radius**2
       end do
     end do
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
 !         res = res + (state%gd(i,j) + static%ghs(i,j))**2 * mesh%full_cos_lat(j)
-        res = res + (state%gd(i,j)**2 / g * 0.5 + state%gd(i,j) * static%ghs(i,j) / g) * mesh%cell_area(j)
+        res = res + (state%gd(i,j)**2 / g * 0.5 + state%gd(i,j) * static%ghs(i,j) / g) * mesh%cell_area(j) / radius**2
       end do
     end do
 
