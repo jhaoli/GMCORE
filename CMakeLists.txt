@@ -49,7 +49,6 @@ set(source_files
   src/log_mod.F90
   src/params_mod.F90
   src/mesh_mod.F90
-  src/sphere_geometry_mod.F90
   src/parallel_mod.F90
   src/types_mod.F90
   src/diag_mod.F90
