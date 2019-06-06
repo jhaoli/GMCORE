@@ -11,7 +11,7 @@ module dycore_mod
   use diag_mod
   use history_mod
   use restart_mod
-  use sphere_geometry_mod
+
   implicit none
 
   private
@@ -61,7 +61,6 @@ contains
 
     call log_init()
     call mesh_init()
-    call calc_edge_area()
     call time_init()
     call parallel_init()
     call io_init()
