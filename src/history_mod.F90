@@ -81,6 +81,13 @@ contains
     call io_add_var('kinetic_energy','debug', long_name='kinetic vorticity',  units='', dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('tangent_lon_flux','debug', long_name='tangential_flux on u',units='', dim_names=['ilon', 'lat ', 'time'])
     call io_add_var('tangent_lat_flux','debug', long_name='tangential_flux on v',units='', dim_names=['lon ', 'ilat', 'time'])
+    !!
+    call io_add_var('tangent_wind_lon', 'debug', long_name='tangent wind lon', units='ms-1', dim_names=['ilon', 'lat ', 'time'])
+    call io_add_var('tangent_wind_lat', 'debug', long_name='tangent wind lat', units='ms-1', dim_names=['lon ', 'ilat', 'time'])
+    call io_add_var('gradient_pv_lon', 'debug', long_name='gradient pv lon', units='m-1s-1', dim_names=['ilon', 'lat ', 'time'])
+    call io_add_var('gradient_pv_lat', 'debug', long_name='gradient pv lat', units='m-1s-1', dim_names=['lon ', 'ilat', 'time'])
+    call io_add_var('tangent_gradient_pv_lon', 'debug', long_name='tangent_gradient_pv_lon',units='', dim_names=['ilon', 'lat ', 'time'])
+    call io_add_var('tangent_gradient_pv_lat', 'debug', long_name='tangent_gradient_pv_lat',units='', dim_names=['lon ', 'ilat', 'time'])
     if (.not. allocated(u)) call parallel_allocate(u)
     if (.not. allocated(v)) call parallel_allocate(v)
     if (.not. allocated(gh)) call parallel_allocate(gh)
@@ -160,6 +167,13 @@ contains
     call io_output('hd_corner',     tend%diag%hd_corner(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
     call io_output('tangent_lon_flux', tend%diag%tangent_lon_flux(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
     call io_output('tangent_lat_flux', tend%diag%tangent_lat_flux(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+!!
+    call io_output('tangent_wind_lon', tend%diag%tangent_wind_lon(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
+    call io_output('tangent_wind_lat', tend%diag%tangent_wind_lat(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+    call io_output('gradient_pv_lon', tend%diag%gradient_pv_lon(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
+    call io_output('gradient_pv_lat', tend%diag%gradient_pv_lat(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+    call io_output('tangent_gradient_pv_lon', tend%diag%tangent_gradient_pv_lon(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
+    call io_output('tangent_gradient_pv_lat', tend%diag%tangent_gradient_pv_lat(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
     call io_end_output('debug')
 
   end subroutine history_write_tendency

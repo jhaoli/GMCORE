@@ -231,6 +231,7 @@ contains
       mesh%vertex_lon_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%cell_lat_distance(j)
     end do 
 
+    
     total_distance = 0.0
     do j = 1, mesh%num_half_lat
       total_distance = total_distance + mesh%vertex_lon_distance(j)
