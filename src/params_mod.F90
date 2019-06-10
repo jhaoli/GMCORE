@@ -9,6 +9,7 @@ module params_mod
   real, parameter :: omega = 2.0 * pi / 86400.0
   real, parameter :: radius = 6.37122e6
   real, parameter :: g = 9.80616
+  real, parameter :: eps = epsilon(1.0d0)
 
   integer num_lon
   integer num_lat

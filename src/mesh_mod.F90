@@ -2,6 +2,7 @@ module mesh_mod
 
   use log_mod
   use params_mod
+  use sphere_geometry_mod
 
   implicit none
 
@@ -39,8 +40,17 @@ module mesh_mod
     real, allocatable :: cell_area(:) 
     real, allocatable :: vertex_area(:)  
     real, allocatable :: lon_edge_area(:)
+    real, allocatable :: lon_edge_left_area(:)
+    real, allocatable :: lon_edge_right_area(:)
     real, allocatable :: lat_edge_area(:)
+    real, allocatable :: lat_edge_up_area(:)
+    real, allocatable :: lat_edge_down_area(:)
     real, allocatable :: subcell_area(:,:)
+    ! edge distance of cell and vertex
+    real, allocatable :: cell_lon_distance(:)
+    real, allocatable :: cell_lat_distance(:)
+    real, allocatable :: vertex_lon_distance(:)
+    real, allocatable :: vertex_lat_distance(:)
   end type mesh_type
 
   type(mesh_type) mesh
@@ -76,8 +86,16 @@ contains
     allocate(mesh%cell_area(mesh%num_full_lat))
     allocate(mesh%vertex_area(mesh%num_half_lat))
     allocate(mesh%lon_edge_area(mesh%num_full_lat))
+    allocate(mesh%lon_edge_left_area(mesh%num_full_lat))
+    allocate(mesh%lon_edge_right_area(mesh%num_full_lat))
     allocate(mesh%lat_edge_area(mesh%num_half_lat))
+    allocate(mesh%lat_edge_up_area(mesh%num_half_lat))
+    allocate(mesh%lat_edge_down_area(mesh%num_half_lat))
     allocate(mesh%subcell_area(2,mesh%num_full_lat))
+    allocate(mesh%cell_lon_distance(mesh%num_full_lat))
+    allocate(mesh%cell_lat_distance(mesh%num_half_lat))
+    allocate(mesh%vertex_lon_distance(mesh%num_half_lat))
+    allocate(mesh%vertex_lat_distance(mesh%num_full_lat))
 
     mesh%dlon = 2 * pi / mesh%num_full_lon
     do i = 1, mesh%num_full_lon
@@ -122,20 +140,8 @@ contains
     mesh%half_sin_lat(1) = -1.0
     mesh%half_sin_lat(mesh%num_half_lat) = 1.0
 
-! approximatly calculate the cell area   
-!     do j = 1, mesh%num_full_lat
-!       mesh%cell_area(j) = radius**2 * mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat
-!     end do
-    
-!     do j = 2, mesh%num_half_lat-1
-!       mesh%vertex_area(j) = radius**2 * mesh%half_cos_lat(j) * mesh%dlon * mesh%dlat
-!     end do 
-!     mesh%vertex_area(1) = radius**2 * pi *(mesh%dlat*0.5)**2 / mesh%num_full_lon !radius**2 * mesh%dlon * ( mesh%full_sin_lat(1) + 1)
-!     mesh%vertex_area(mesh%num_half_lat) = radius**2 * pi *(mesh%dlat*0.5)**2 / mesh%num_full_lon !radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
 !  integrate compute the cell area
-    do j = 1, mesh%num_full_lat
-      mesh%cell_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j))
-    end do
+
      
     do j = 2, mesh%num_half_lat-1
       mesh%vertex_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j) - mesh%full_sin_lat(j-1))
@@ -157,10 +163,12 @@ contains
     mesh%lat_edge_area(1) = 0.0
     mesh%lat_edge_area(mesh%num_half_lat) = 0.0
 
+!!!
     do j = 1, mesh%num_full_lat
-      ! 1 for up, 2 for down
-      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j)) / mesh%cell_area(j) !mesh%vertex_area(j+1)
-      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j)) / mesh%cell_area(j) !mesh%vertex_area(j)
+      mesh%cell_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j))
+      mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j))
+      mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j))
+      
     end do 
 
     call log_notice('Mesh module is initialized.')
@@ -184,8 +192,17 @@ contains
     if (allocated(mesh%cell_area)) deallocate(mesh%cell_area)
     if (allocated(mesh%vertex_area)) deallocate(mesh%vertex_area)
     if (allocated(mesh%lon_edge_area)) deallocate(mesh%lon_edge_area)
+    if (allocated(mesh%lon_edge_left_area)) deallocate(mesh%lon_edge_left_area)
+    if (allocated(mesh%lon_edge_right_area)) deallocate(mesh%lon_edge_right_area)
     if (allocated(mesh%lat_edge_area)) deallocate(mesh%lat_edge_area)
+    if (allocated(mesh%lat_edge_up_area)) deallocate(mesh%lat_edge_up_area)
+    if (allocated(mesh%lat_edge_down_area)) deallocate(mesh%lat_edge_down_area)
     if (allocated(mesh%subcell_area)) deallocate(mesh%subcell_area)
+    if (allocated(mesh%cell_lon_distance)) deallocate(mesh%cell_lon_distance)
+    if (allocated(mesh%cell_lat_distance)) deallocate(mesh%cell_lat_distance)
+    if (allocated(mesh%vertex_lon_distance)) deallocate(mesh%vertex_lon_distance)
+    if (allocated(mesh%vertex_lat_distance)) deallocate(mesh%vertex_lat_distance)
+
     call log_notice('Mesh module is finalized.')
 
   end subroutine mesh_final
