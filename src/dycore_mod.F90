@@ -268,7 +268,7 @@ contains
 
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
         diag%pv(i,j) = tend%diag%pot_vor(i,j)
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2
+        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do
     end do
 
@@ -293,7 +293,7 @@ contains
         diag%vor(i,j) = sp / area_pole
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
         diag%pv(i,j) = tend%diag%pot_vor(i,j)
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2
+        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do                              
     end if
     
@@ -318,7 +318,7 @@ contains
         diag%vor(i,j) = np / area_pole
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
         diag%pv(i,j) = tend%diag%pot_vor(i,j)
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2
+        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do
     end if
     call parallel_fill_halo(diag%vor, all_halo=.true.)
