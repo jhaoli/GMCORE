@@ -60,6 +60,7 @@ contains
   subroutine mesh_init()
 
     integer i, j
+    real x(3), y(3), z(3), total_area, total_distance
 
     mesh%num_full_lon = num_lon
     mesh%num_half_lon = num_lon
@@ -140,39 +141,97 @@ contains
     mesh%half_sin_lat(1) = -1.0
     mesh%half_sin_lat(mesh%num_half_lat) = 1.0
 
-!  integrate compute the cell area
-
-     
-    do j = 2, mesh%num_half_lat-1
-      mesh%vertex_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j) - mesh%full_sin_lat(j-1))
-    end do
-    mesh%vertex_area(1) = radius**2 * mesh%dlon * (mesh%full_sin_lat(1) + 1)
-    mesh%vertex_area(mesh%num_half_lat) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(mesh%num_full_lat))
-    
-!     print*, 'total primal area:', sum(mesh%cell_area)*mesh%num_full_lon
-!     print*, 'total   dual area:', sum(mesh%vertex_area)*mesh%num_full_lon 
-!     print*, 'the earth    area:', 4 * pi * radius**2
-!     stop 'mesh'
-
-    do j = 1, mesh%num_full_lat
-      mesh%lon_edge_area(j) = radius**2 * mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat
-    end do 
-    do j = 2, mesh%num_half_lat-1
-      mesh%lat_edge_area(j) = radius**2 * mesh%half_cos_lat(j) * mesh%dlon * mesh%dlat
-    end do 
-    mesh%lat_edge_area(1) = 0.0
-    mesh%lat_edge_area(mesh%num_half_lat) = 0.0
-
-!!!
     do j = 1, mesh%num_full_lat
       mesh%cell_area(j) = radius**2 * mesh%dlon * (mesh%half_sin_lat(j+1) - mesh%half_sin_lat(j))
       mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (mesh%full_sin_lat(j) - mesh%half_sin_lat(j))
       mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j+1) - mesh%full_sin_lat(j))
-      
+      call cartesian_transform(mesh%full_lon(1), mesh%full_lat(j  ), x(1), y(1), z(1))
+      call cartesian_transform(mesh%half_lon(1), mesh%half_lat(j  ), x(2), y(2), z(2))
+      call cartesian_transform(mesh%half_lon(1), mesh%half_lat(j+1), x(3), y(3), z(3))
+      mesh%lon_edge_left_area(j) = calc_area(x, y, z)
+      mesh%lon_edge_right_area(j) = mesh%lon_edge_left_area(j)
+      mesh%lon_edge_area(j) = mesh%lon_edge_left_area(j) + mesh%lon_edge_right_area(j)   
+    end do 
+    
+    do j = 1, mesh%num_half_lat
+      if(j == 1) then
+        mesh%vertex_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j) +1)
+        mesh%lat_edge_down_area(j) = 0.0
+        mesh%lat_edge_up_area(j) = 0.0
+        mesh%lat_edge_area(j) = 0.0
+      else if (j == mesh%num_half_lat) then
+        mesh%vertex_area(j) = radius**2 * mesh%dlon * (1 - mesh%full_sin_lat(j-1))
+        mesh%lat_edge_down_area(j) = 0.0
+        mesh%lat_edge_up_area(j) = 0.0
+        mesh%lat_edge_area(j) = 0.0
+      else
+        mesh%vertex_area(j) = radius**2 * mesh%dlon * (mesh%full_sin_lat(j) - mesh%full_sin_lat(j-1))
+        call cartesian_transform(mesh%full_lon(2), mesh%full_lat(j), x(1), y(1), z(1))
+        call cartesian_transform(mesh%half_lon(1), mesh%half_lat(j), x(2), y(2), z(2))
+        call cartesian_transform(mesh%half_lon(2), mesh%half_lat(j), x(3), y(3), z(3))
+        mesh%lat_edge_up_area(j) = calc_area_with_last_small_arc(x, y, z)
+    
+        call cartesian_transform(mesh%full_lon(2), mesh%full_lat(j-1), x(1), y(1), z(1))
+        call cartesian_transform(mesh%half_lon(2), mesh%half_lat(j  ), x(2), y(2), z(2))
+        call cartesian_transform(mesh%half_lon(1), mesh%half_lat(j  ), x(3), y(3), z(3))
+        mesh%lat_edge_down_area(j) = calc_area_with_last_small_arc(x, y, z)
+        
+        mesh%lat_edge_area(j) = mesh%lat_edge_up_area(j) + mesh%lat_edge_down_area(j)
+      end if 
+    end do 
+    
+    total_area = 0.0
+    do j = 1, mesh%num_full_lat
+      total_area = total_area + mesh%cell_area(j) * mesh%num_full_lon
+    end do 
+    if ( abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0E-11) then
+      call log_notice('Failed to calculate cell area!')
+    endif
+
+    total_area = 0.0
+    do j = 1, mesh%num_half_lat
+      total_area = total_area + mesh%vertex_area(j) * mesh%num_half_lon
+    end do 
+    
+    if ( abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0E-11) then
+      call log_notice('Failed to calculate vertex area!')
+    endif
+
+    total_area = 0.0
+    do j = 1, mesh%num_full_lat
+      total_area = total_area + mesh%lon_edge_area(j) * mesh%num_full_lon
+    end do 
+    do j = 1, mesh%num_half_lat
+      total_area = total_area + mesh%lat_edge_area(j) * mesh%num_full_lon
+    end do 
+    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-11) then
+      call log_error('Failed to calculate edge area!')
+    end if
+
+    do j = 1, mesh%num_full_lat
+      total_area = (mesh%subcell_area(1,j) + mesh%subcell_area(2,j)) * 2
+      if (abs(total_area - mesh%cell_area(j)) / mesh%cell_area(j) > 1.0E-12) then
+        call log_error('Failed to calculate subcell area!')
+      end if 
+    end do 
+
+    do j = 1, mesh%num_full_lat
+        mesh%cell_lon_distance(j) = radius * mesh%dlat
+        mesh%vertex_lat_distance(j) = 2.0 * mesh%lon_edge_area(j) / mesh%cell_lon_distance(j) 
+    end do 
+
+    do j = 1, mesh%num_half_lat
+      if (j ==1 .or.j == mesh%num_half_lat) then
+        mesh%cell_lat_distance(j) = 0 
+        mesh%vertex_lon_distance(j) = 0 
+      else
+        mesh%cell_lat_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
+        mesh%vertex_lon_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%cell_lat_distance(j)
+      end if 
     end do 
 
     call log_notice('Mesh module is initialized.')
-
+    
   end subroutine mesh_init
 
   subroutine mesh_final()
