@@ -1,0 +1,19 @@
+&dycore_params
+test_case = 'shallow_water_waves'
+case_name = 'sw_c_u_01.360x180.dt360'
+case_desc = 'Shallow-water waves test'
+author = 'Li Dong <dongli@lasg.iap.ac.cn>'
+run_days = 365
+num_lon = 180
+num_lat = 91
+time_step_size = 30
+history_periods = '1 days'
+restart_period = '30 days'
+pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind'
+time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta'
+qcon_modified = .false.
+split_scheme = ' ' ! 'csp2' or 'csp1' or 'isp'
+subcycles = 10
+use_zonal_tend_filter = .true.
+zonal_tend_filter_cutoff_wavenumber = 4, 4, 4, 4, 4
+/
