@@ -97,37 +97,43 @@ contains
     real(dp) C
     integer i, j
 
-    write(6, *) '[Notice]: Use shallow water waves initial condition.'
+    call log_notice('Use shallow water waves initial condition.')
 
-    allocate(u(mesh%num_half_lon,mesh%num_full_lat,1))
-    allocate(v(mesh%num_full_lon,mesh%num_half_lat,1))
+    allocate(u(mesh%num_full_lon,mesh%num_full_lat,1))
+    allocate(v(mesh%num_full_lon,mesh%num_full_lat,1))
     allocate(h(mesh%num_full_lon,mesh%num_full_lat,1))
-    call getFields(mesh%full_lat, mesh%full_lon, mesh%half_lat, mesh%half_lon, [0.0], u, v, h, 0)
+    call getFields(mesh%full_lat, mesh%full_lon, [0.0], u, v, h, 0)
     call getPhaseSpeed(C, 0)
     call log_notice('Phase speed is ' // trim(to_string(C, 20)))
 
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+    do j = 1, mesh%num_full_lat
+      do i = 1, mesh%num_full_lon
         state(1)%gd(i,j) = g * h(i,j,1) + 5.0d4
       end do
     end do
 
     call parallel_fill_halo(state(1)%gd, all_halo=.true.)
 
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        state(1)%u(i,j) = u(i,j,1)
+    do j = 1, mesh%num_full_lat
+      do i = 1, mesh%num_half_lon
+        if (i == 1) then
+          state(1)%u(i,j) = (u(i,j,1) + u(mesh%num_full_lon,j,1)) * 0.5_dp
+        else if (i == mesh%num_half_lon) then
+          state(1)%u(i,j) = (u(i,j,1) + u(1,j,1)) * 0.5_dp
+        else
+          state(1)%u(i,j) = (u(i,j,1) + u(i+1,j,1)) * 0.5_dp
+        end if
       end do
     end do
 
     call parallel_fill_halo(state(1)%u, all_halo=.true.)
 
-    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        state(1)%v(i,j) = v(i,j,1)
+    do j = 1, mesh%num_half_lat
+      do i = 1, mesh%num_full_lon
+        state(1)%v(i,j) = (v(i,j,1) + v(i,j+1,1)) * 0.5_dp
       end do
     end do
-
+      
     call parallel_fill_halo(state(1)%v, all_halo=.true.)
 
     deallocate(u)
@@ -271,15 +277,13 @@ contains
 !========================================================================
 ! u,v,h fields
 !========================================================================
-  subroutine getFields(lat,lon,ilat,ilon,time,u,v,h,waveFlag)
+  subroutine getFields(lat,lon,time,u,v,h,waveFlag)
 
     implicit none
 
     integer,       intent(in)    :: waveFlag            ! -1=WIG, 0=Rossby, 1=EIG
     real(kind=dp), intent(in)    :: lat(:)              ! latitude (rad)
     real(kind=dp), intent(in)    :: lon(:)              ! longitude (rad)
-    real(kind=dp), intent(in)    :: ilat(:)             ! latitude (rad)
-    real(kind=dp), intent(in)    :: ilon(:)             ! longitude (rad)
     real(kind=dp), intent(in)    :: time(:)             ! time (sec)
     real(kind=dp), intent(inout) :: u(:,:,:)            ! zonal velocity field
     real(kind=dp), intent(inout) :: v(:,:,:)            ! meridional velocity field
@@ -298,14 +302,14 @@ contains
 
     do n=1,size(time)
        do j=1,size(lat)
-          do i=1,size(ilon)
+          do i=1,size(lon)
              u(i,j,n) = uTilde(j) * &
-                 cos( k * ilon(i) - k * C * time(n) )
+                 cos( k * lon(i) - k * C * time(n) )
           end do
        end do
     end do
     do n=1,size(time)
-       do j=1,size(ilat)
+       do j=1,size(lat)
           do i=1,size(lon)
              v(i,j,n) = vTilde(j) * &
                  cos( k * lon(i) - k * C * time(n) - 0.5_dp * pi )
