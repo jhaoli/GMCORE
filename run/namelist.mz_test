@@ -1,6 +1,6 @@
 &dycore_params
 test_case = 'mountain_zonal_flow'
-case_name = 'mz_c_u_01.180x90.dt720'
+case_name = 'mz_c_u_01.180x91.dt30'
 case_desc = 'Mountain zonal flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
 run_days = 50
@@ -9,9 +9,8 @@ num_lat = 91
 time_step_size = 30
 history_periods = '1 days'
 restart_period = '10 days'
-pv_scheme = 4 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind'
+pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta2'
-uv_adv_scheme = 'center_diff' ! 'center_diff' or 'upwind' or 'weno'
 qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 subcycles = 8
