@@ -11,7 +11,7 @@ module steady_geostrophic_flow_test_mod
 
   public steady_geostrophic_flow_test_set_initial_condition
 
-  real, parameter :: alpha = 0.0
+  real, parameter :: alpha = pi / 2.0 ! 0.0
   real, parameter :: u0 = 2 * pi * radius / (12 * 86400)
   real, parameter :: gd0 = 2.94e4 ! m2 s-2
 
@@ -28,7 +28,7 @@ contains
     sin_alpha = sin(alpha)
     static%ghs(:,:) = 0.0
 
-    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       cos_lat = mesh%full_cos_lat(j)
       sin_lat = mesh%full_sin_lat(j)
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx

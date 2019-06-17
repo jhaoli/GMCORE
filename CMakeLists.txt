@@ -48,6 +48,8 @@ set(source_files
   src/io_mod.F90
   src/log_mod.F90
   src/params_mod.F90
+  src/math_mod.F90
+  src/sphere_geometry_mod.F90
   src/mesh_mod.F90
   src/parallel_mod.F90
   src/types_mod.F90
