@@ -193,7 +193,6 @@ contains
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx  
           tend%dgd(i,j) = tend%mass_div(i,j) 
-!           tend%dgd(i,j) = tend%mass_div_lon(i,j) + tend%mass_div_lat(i,j)
         end do
       end do
     case (slow_pass)
