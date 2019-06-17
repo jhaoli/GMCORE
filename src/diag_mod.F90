@@ -25,6 +25,7 @@ module diag_mod
     real total_enstrophy
     real, allocatable :: vor(:,:)
     real, allocatable :: div(:,:)
+    real, allocatable :: pv(:,:)
   end type diag_type
 
   type(diag_type) diag
@@ -34,6 +35,7 @@ contains
   subroutine diag_init()
 
     if (.not. allocated(diag%vor)) call parallel_allocate(diag%vor, half_lon=.true., half_lat=.true.)
+    if (.not. allocated(diag%pv))  call parallel_allocate(diag%pv, half_lon=.true., half_lat=.true.)
     if (.not. allocated(diag%div)) call parallel_allocate(diag%div)
 
     call log_notice('Diag module is initialized.')
@@ -85,7 +87,7 @@ contains
 
     if (allocated(diag%vor)) deallocate(diag%vor)
     if (allocated(diag%div)) deallocate(diag%div)
-
+    if (allocated(diag%pv)) deallocate(diag%pv)
   end subroutine diag_final
 
   real function diag_total_energy(state) result(res)

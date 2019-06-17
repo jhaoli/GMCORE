@@ -286,6 +286,7 @@ contains
                                                      state%u(i,j+1) * mesh%vertex_lat_distance(j+1)-&
                                                      state%v(i,j  ) * mesh%vertex_lon_distance(j  ))
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
+        diag%pv(i,j) = tend%diag%pot_vor(i,j)
         diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do
     end do
