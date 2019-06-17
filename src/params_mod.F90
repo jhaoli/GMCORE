@@ -53,7 +53,8 @@ module params_mod
   ! - center_diff
   ! - upwind
   ! - weno
-  integer pv_scheme 
+  integer pv_scheme
+  integer conserve_scheme 
   character(30) :: uv_adv_scheme = 'center_diff'
   real :: uv_adv_upwind_lon_beta = 0.0
   real :: uv_adv_upwind_lat_beta = 0.5
@@ -84,6 +85,7 @@ module params_mod
     restart_period, &
     restart_file, &
     pv_scheme,&
+    conserve_scheme,&
     time_scheme, &
     time_order, &
     qcon_modified, &
