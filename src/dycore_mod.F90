@@ -174,7 +174,15 @@ contains
 
     select case (pass)
     case (all_pass)
-      call nonlinear_coriolis_operator(state, tend)
+      if (conserve_scheme == 1) then
+        call nonlinear_coriolis_operator_energy_conserve(state, tend)
+      else if (conserve_scheme == 2) then
+        call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
+      else
+        call log_error('Unknown conserve_scheme')
+      end if 
+      call calc_total_potential_enstrophy(state, tend)
+
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
 
@@ -201,7 +209,14 @@ contains
       tend%v_pgf = 0.0
       tend%mass_div = 0.0
 #endif 
-      call nonlinear_coriolis_operator(state, tend)
+      if (conserve_scheme == 1) then
+        call nonlinear_coriolis_operator_energy_conserve(state, tend)
+      else if (conserve_scheme == 2) then
+        call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
+      else
+        call log_error('Unknown conserve_scheme')
+      end if
+      call calc_total_potential_enstrophy(state, tend)
 
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
@@ -273,10 +288,8 @@ contains
   subroutine calc_pv_on_vertex(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
-    real r1, r2
     integer :: i, j
 
-    diag%total_enstrophy = 0.0
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         tend%diag%hd_corner(i,j) = 1.0 / mesh%vertex_area(j) * (mesh%subcell_area(1,j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1)) +&
@@ -287,7 +300,6 @@ contains
                                                      state%v(i,j  ) * mesh%vertex_lon_distance(j  ))
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
         diag%pv(i,j) = tend%diag%pot_vor(i,j)
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do
     end do
     call parallel_fill_halo(diag%vor, all_halo=.true.)
@@ -341,7 +353,6 @@ contains
   subroutine calc_tangent_mass_flux(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
-    real r1, r2
     integer :: i, j
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
@@ -369,13 +380,12 @@ contains
     call parallel_fill_halo(tend%diag%tangent_lat_flux, all_halo=.true.)
   end subroutine calc_tangent_mass_flux
 
-  subroutine nonlinear_coriolis_operator(state, tend)
+  subroutine nonlinear_coriolis_operator_energy_conserve(state, tend)
 
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer :: i, j
-    real :: r1, r2
-    real pv_avg
+
     select case(pv_scheme)
     case(1)
       call calc_pv_on_edge_midpoint(state, tend)
@@ -409,7 +419,30 @@ contains
       end do 
     end do  
 
-  end subroutine nonlinear_coriolis_operator
+  end subroutine nonlinear_coriolis_operator_energy_conserve
+
+
+  subroutine nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
+
+    type(state_type), intent(in) :: state
+    type(tend_type), intent(inout) :: tend
+    integer :: i, j
+ 
+    call calc_pv_on_edge_midpoint(state, tend)
+
+    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+        tend%u_nonlinear(i,j) = tend%diag%tangent_lon_flux(i,j) * tend%diag%pv_lon(i,j)
+      end do
+    end do      
+
+    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+        tend%v_nonlinear(i,j) = -tend%diag%tangent_lat_flux(i,j) * tend%diag%pv_lat(i,j)
+      end do 
+    end do  
+  end subroutine nonlinear_coriolis_operator_enstrophy_conserve
+
 
   subroutine calc_pv_on_edge_midpoint(state, tend)
     type(state_type), intent(in) :: state
@@ -661,6 +694,21 @@ contains
 
   end subroutine calc_pv_on_edge_APVM
 
+  subroutine calc_total_potential_enstrophy(state, tend)
+    type(state_type), intent(in) :: state
+    type(tend_type), intent(inout) :: tend
+
+    integer i, j 
+
+    diag%total_enstrophy = 0.0
+    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j) 
+      end do
+    end do 
+
+  end subroutine calc_total_potential_enstrophy
+
 
   subroutine energy_gradient_operator(state, tend)
     type(state_type), intent(in) :: state
@@ -829,22 +877,22 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        ip_egf = ip_egf + tend%u_pgf(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j) *2 / radius**2 !/ mesh%dlon / mesh%dlat
-        ip_fv = ip_fv + tend%u_nonlinear(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j) / radius**2 !/ mesh%dlon / mesh%dlat
+        ip_egf = ip_egf + tend%u_pgf(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j) *2 / radius**2 
+        ip_fv = ip_fv + tend%u_nonlinear(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j) / radius**2 
       end do 
     end do 
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        ip_egf = ip_egf + tend%v_pgf(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j) *2 / radius**2 !/ mesh%dlon / mesh%dlat
-        ip_fu = ip_fu + tend%v_nonlinear(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j) / radius**2 !/ mesh%dlon / mesh%dlat
+        ip_egf = ip_egf + tend%v_pgf(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j) *2 / radius**2 
+        ip_fu = ip_fu + tend%v_nonlinear(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j) / radius**2 
       end do 
     end do 
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        ip_energy_div = ip_energy_div + tend%diag%energy(i,j) * tend%mass_div(i,j) * mesh%cell_area(j) / radius**2 !/ mesh%dlon / mesh%dlat
-        ip_mass_div = ip_mass_div + tend%mass_div(i,j) * mesh%cell_area(j) / radius**2 !/ mesh%dlon / mesh%dlat
+        ip_energy_div = ip_energy_div + tend%diag%energy(i,j) * tend%mass_div(i,j) * mesh%cell_area(j) / radius**2 
+        ip_mass_div = ip_mass_div + tend%mass_div(i,j) * mesh%cell_area(j) / radius**2 
       end do
     end do
     print*, 'nonlinear Coriolis:    ' ,' total energy transfer tendency:', '      total mass tendency:'

@@ -1,22 +1,20 @@
 &dycore_params
 test_case = 'jet_zonal_flow'
-case_name = 'jz_test.360x181.pc.dt240.diffused'
+case_name = 'jz_test.180x91.pc.dt10'
 case_desc = 'Jet zonal flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
-days = 6
-num_lon = 360
-num_lat = 181
-time_step_size = 240
-history_periods = '1 hours'
-restart_period = '6 hours'
+run_days = 6
+num_lon = 180
+num_lat = 91
+time_step_size = 10
+history_periods = '6 hours'
+restart_period = '100 hours'
+pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind', 3-'APVM', 4-'2D upwind'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta'
-qcon_modified = .true.
-split_scheme = 'csp2' ! 'csp2' or 'csp1' or 'isp'
+conserve_scheme = 1 ! 1-'engergy-conserving', 2-'potential enstrophy conserving'
+qcon_modified = .false.
+split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 subcycles = 6
-use_zonal_reduce = .true.
-reduce_adv_lon = .true.
-zonal_reduce_factors = 8, 8, 4, 2, 2
-use_reduce_tend_smooth = .true.
-use_diffusion = .true.
-diffusion_coef = 1.0e5
+use_zonal_tend_filter = .false.
+zonal_tend_filter_cutoff_wavenumber = 4, 4, 4, 4, 4
 /
