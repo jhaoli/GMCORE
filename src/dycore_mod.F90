@@ -97,7 +97,7 @@ contains
   subroutine dycore_run()
 
     call diag_run(state(old))
-    call output(state(old))
+    call history_write(state(old), static, diag)
     call log_add_diag('total_mass', diag%total_mass)
     call log_add_diag('total_energy', diag%total_energy)
     call log_add_diag('total_potential_enstrophy', diag%total_enstrophy)
@@ -134,7 +134,6 @@ contains
     type(state_type), intent(in) :: state 
 
     if (time_is_alerted('hist0.output')) call history_write(state, static, diag)
-!     call history_write(state, static, diag)
  
 !     if (time_is_alerted('restart.output')) call restart_write(state, static)
 !     if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
@@ -158,7 +157,7 @@ contains
       else if (conserve_scheme == 2) then
         call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
       else
-        call log_error('Unknown PV scheme.')
+        call log_error('Unknown conserve scheme.')
       end if 
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
@@ -191,7 +190,7 @@ contains
       else if (conserve_scheme == 2) then
         call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
       else
-        call log_error('Unknown PV scheme.')
+        call log_error('Unknown conserve scheme.')
       end if 
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx

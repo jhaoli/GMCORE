@@ -10,6 +10,7 @@ time_step_size = 3
 history_periods = '1 hours'
 restart_period = '6 hours'
 pv_scheme = 1 ! 1-'midpoint', 2-'upwind with beta'
+conserve_scheme= 1 ! 1-'enenrgy conserving', 2-'potential enstrophy conserving'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta'
 qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'

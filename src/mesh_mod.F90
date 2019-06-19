@@ -204,7 +204,8 @@ contains
     do j = 1, mesh%num_half_lat
       total_area = total_area + mesh%lat_edge_area(j) * mesh%num_full_lon
     end do 
-    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-11) then
+    
+    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-10) then
       call log_error('Failed to calculate edge area!')
     end if
 
