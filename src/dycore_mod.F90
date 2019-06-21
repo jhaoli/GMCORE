@@ -323,8 +323,37 @@ contains
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g)
       end do
     end do
+
+     j = parallel%half_lat_start_idx
+!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon
+     j = parallel%half_lat_end_idx
+!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon 
+
     call parallel_fill_halo(tend%diag%pot_vor, all_halo=.true.)
+    
   end subroutine calc_pv_on_vertex
+
+  function mean5_3(x,num) result(res)
+  
+    integer, intent(in) :: num
+    real, intent(in) :: x(:)
+    integer n, j, k 
+    real res(size(x))
+
+    n = size(x)
+    do k = 1, num
+      res(1) = (69 * x(1) + 4 * (x(2) + x(4)) - 6 * x(3) - x(5)) / 70
+      res(2) = (2 * (x(1) + x(5)) + 27 * x(2) +12 * x(3) - 8 * x(4)) / 35
+      do j = 3, n-2
+        res(j) = (-3 * (x(j-2) + x(j+2)) + 12 *(x(j-1) + x(j+1)) + 17 * x(j)) / 35
+      end do 
+      res(n-1) = (2 * (x(n) + x(n-4)) + 27 * x(n-1) + 12 * x(n-2) - 8 * x(n-3)) / 35
+      res(n) = (69 * x(n) + 4 * (x(n-1) + x(n-3)) - 6 * x(n-2) - x(n-4)) / 70
+    end do 
+
+  end function mean5_3
 
   subroutine calc_energy_on_center(state, tend)
     type(state_type), intent(in) :: state
@@ -721,6 +750,13 @@ contains
 
     call calc_gd_on_edge(state, tend)
     call calc_pv_on_vertex(state, tend)
+    
+     j = parallel%half_lat_start_idx
+!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon
+     j = parallel%half_lat_end_idx
+!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon 
 
     diag%total_enstrophy = 0.0
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
