@@ -102,7 +102,8 @@ contains
 
     call reset_cos_lat_at_poles()
     call diag_run(state(old))
-    call output(state(old))
+    call calc_total_potential_enstrophy(state(old),tend(old))
+    call history_write(state(old), static, diag)
     call log_add_diag('total_mass', diag%total_mass)
     call log_add_diag('total_energy', diag%total_energy)
     call log_add_diag('total_enstrophy', diag%total_enstrophy)
@@ -114,6 +115,7 @@ contains
       call time_integrate()
       call time_advance()
       call diag_run(state(old))
+      call calc_total_potential_enstrophy(state(old), tend(old))
       call output(state(old))
       call log_add_diag('total_mass', diag%total_mass)
       call log_add_diag('total_energy', diag%total_energy)
@@ -181,7 +183,6 @@ contains
       else
         call log_error('Unknown conserve_scheme')
       end if 
-      call calc_total_potential_enstrophy(state, tend)
 
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
@@ -216,7 +217,6 @@ contains
       else
         call log_error('Unknown conserve_scheme')
       end if
-      call calc_total_potential_enstrophy(state, tend)
 
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
@@ -266,10 +266,11 @@ contains
     type(tend_type), intent(inout) :: tend
     integer :: i, j
 
+    call calc_gd_on_edge(state, tend)
+
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%diag%normal_lon_flux(i,j) = (mesh%lon_edge_left_area(j) * state%gd(i,j) + &
-                                            mesh%lon_edge_right_area(j) * state%gd(i+1,j)) / (mesh%lon_edge_area(j) * g) * state%u(i,j)  
+          tend%diag%normal_lon_flux(i,j) = tend%diag%gd_lon(i,j) / g * state%u(i,j)  
       end do
     end do 
       tend%diag%normal_lon_flux(:,1) = 0.0
@@ -277,14 +278,35 @@ contains
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%normal_lat_flux(i,j) = (mesh%lat_edge_up_area(j) * state%gd(i,j+1) + &
-                                          mesh%lat_edge_down_area(j) * state%gd(i,j)) / (mesh%lat_edge_area(j) * g) * state%v(i,j)
+        tend%diag%normal_lat_flux(i,j) =  tend%diag%gd_lat(i,j) / g * state%v(i,j)
       end do 
     end do 
     call parallel_fill_halo(tend%diag%normal_lon_flux, all_halo=.true.)
     call parallel_fill_halo(tend%diag%normal_lat_flux, all_halo=.true.)
   end subroutine calc_normal_mass_flux
-  
+
+  subroutine calc_gd_on_edge(state, tend)
+    type(state_type), intent(in) :: state
+    type(tend_type), intent(inout) :: tend
+    integer :: i, j 
+    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+          tend%diag%gd_lon(i,j) = (mesh%lon_edge_left_area(j) * state%gd(i,j) + &
+                                   mesh%lon_edge_right_area(j) * state%gd(i+1,j)) / mesh%lon_edge_area(j) 
+      end do
+    end do 
+      tend%diag%normal_lon_flux(:,1) = 0.0
+      tend%diag%normal_lon_flux(:,parallel%full_lat_end_idx) = 0.0
+
+    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+        tend%diag%gd_lat(i,j) = (mesh%lat_edge_up_area(j) * state%gd(i,j+1) + &
+                                 mesh%lat_edge_down_area(j) * state%gd(i,j)) / mesh%lat_edge_area(j)
+      end do 
+    end do 
+  end subroutine calc_gd_on_edge
+
+
   subroutine calc_pv_on_vertex(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
@@ -292,17 +314,15 @@ contains
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%diag%hd_corner(i,j) = 1.0 / mesh%vertex_area(j) * (mesh%subcell_area(1,j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1)) +&
-                                                                mesh%subcell_area(2,j  ) * (state%gd(i,j  ) + state%gd(i+1,j  ))) / g 
+        tend%diag%gd_corner(i,j) = 1.0 / mesh%vertex_area(j) * (mesh%subcell_area(1,j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1)) +&
+                                                                mesh%subcell_area(2,j  ) * (state%gd(i,j  ) + state%gd(i+1,j  ))) 
         diag%vor(i,j) = 1.0 / mesh%vertex_area(j) * (state%u(i,j  ) * mesh%vertex_lat_distance(j  ) +&
                                                      state%v(i+1,j) * mesh%vertex_lon_distance(j  ) -&
                                                      state%u(i,j+1) * mesh%vertex_lat_distance(j+1)-&
                                                      state%v(i,j  ) * mesh%vertex_lon_distance(j  ))
-        tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / tend%diag%hd_corner(i,j)
-        diag%pv(i,j) = tend%diag%pot_vor(i,j)
+        tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g)
       end do
     end do
-    call parallel_fill_halo(diag%vor, all_halo=.true.)
     call parallel_fill_halo(tend%diag%pot_vor, all_halo=.true.)
   end subroutine calc_pv_on_vertex
 
@@ -697,16 +717,18 @@ contains
   subroutine calc_total_potential_enstrophy(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
-
     integer i, j 
+
+    call calc_gd_on_edge(state, tend)
+    call calc_pv_on_vertex(state, tend)
 
     diag%total_enstrophy = 0.0
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * tend%diag%hd_corner(i,j) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j) 
-      end do
+        diag%total_enstrophy = diag%total_enstrophy + 0.5 * (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
+      end do 
     end do 
-
+!     diag%total_enstrophy = diag%total_enstrophy / (4 * pi * radius**2)
   end subroutine calc_total_potential_enstrophy
 
 

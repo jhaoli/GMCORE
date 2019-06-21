@@ -51,22 +51,20 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        diag%div(i,j) = ((state%u(i,j) - state%u(i-1,j)) * radius * mesh%dlat +&
-                          state%v(i,j) * radius * mesh%half_cos_lat(j) * mesh%dlon -&
-                          state%v(i,j-1) * radius * mesh%half_cos_lat(j-1) * mesh%dlon) / mesh%cell_area(j)
+        diag%div(i,j) = ((state%u(i,j) - state%u(i-1,j)) * mesh%cell_lon_distance(j) +&
+                          state%v(i,j) * mesh%cell_lat_distance(j) -&
+                          state%v(i,j-1) * mesh%cell_lat_distance(j-1)) / mesh%cell_area(j)
       end do
     end do
     call parallel_fill_halo(diag%div, all_halo=.true.)
-
+    
     diag%total_mass = 0.0
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-!         diag%total_mass = diag%total_mass + mesh%full_cos_lat(j) * mesh%dlon * mesh%dlat * state%gd(i,j)
-        diag%total_mass = diag%total_mass + mesh%cell_area(j) * state%gd(i,j) / radius**2
+        diag%total_mass = diag%total_mass + mesh%cell_area(j) * state%gd(i,j)
       end do
-    end do
-    diag%total_mass = diag%total_mass * radius**2
-
+    end do  
+!     diag%total_mass = diag%total_mass / (4 * pi * radius**2)
     if (ieee_is_nan(diag%total_mass)) then
       call log_error('Total mass is NaN!')
     end if
@@ -95,26 +93,32 @@ contains
     type(state_type), intent(in) :: state
 
     integer i, j
+    real hd_lon(parallel%half_lon_start_idx: parallel%half_lon_end_idx, &
+                parallel%full_lat_start_idx_no_pole: parallel%full_lat_end_idx_no_pole)
+    real hd_lat(parallel%full_lon_start_idx: parallel%full_lon_end_idx, &
+                parallel%half_lat_start_idx: parallel%half_lat_end_idx)
 
     res = 0.0
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        res = res + (mesh%lon_edge_left_area(j) * state%gd(i,j) + mesh%lon_edge_right_area(j) * state%gd(i+1,j)) /&
-              (mesh%lon_edge_area(j) * g) * state%u(i,j)**2 * mesh%lon_edge_area(j) / radius**2
+        hd_lon(i,j) = (mesh%lon_edge_left_area(j) * state%gd(i,j) + &
+                       mesh%lon_edge_right_area(j) * state%gd(i+1,j)) / (mesh%lon_edge_area(j) * g)
+        res = res + 0.5 * hd_lon(i,j) * state%u(i,j)**2 * mesh%lon_edge_area(j) 
       end do
     end do
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        res = res + (mesh%lat_edge_up_area(j) * state%gd(i,j+1) + mesh%lat_edge_down_area(j) * state%gd(i,j)) /&
-              (mesh%lat_edge_area(j) * g)  * state%v(i,j)**2 * mesh%lat_edge_area(j) / radius**2
+        hd_lat(i,j) = (mesh%lat_edge_up_area(j) * state%gd(i,j+1) + &
+                       mesh%lat_edge_down_area(j) * state%gd(i,j)) / (mesh%lat_edge_area(j) * g)
+        res = res + 0.5 * hd_lat(i,j) * state%v(i,j)**2 * mesh%lat_edge_area(j) 
       end do
     end do
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-!         res = res + (state%gd(i,j) + static%ghs(i,j))**2 * mesh%full_cos_lat(j)
-        res = res + (state%gd(i,j)**2 / g * 0.5 + state%gd(i,j) * static%ghs(i,j) / g) * mesh%cell_area(j) / radius**2
+        res = res + (state%gd(i,j)**2 / g * 0.5 + state%gd(i,j) * static%ghs(i,j) / g) * mesh%cell_area(j)
       end do
     end do
 
+!     res = res / (4 * pi * radius**2)
   end function diag_total_energy
 end module diag_mod
