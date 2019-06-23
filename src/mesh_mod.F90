@@ -217,17 +217,17 @@ contains
     end do 
 
     do j = 1, mesh%num_full_lat
-        mesh%cell_lon_distance(j) = radius * mesh%dlat
-        mesh%vertex_lat_distance(j) = 2.0 * mesh%lon_edge_area(j) / mesh%cell_lon_distance(j) 
+      mesh%vertex_lat_distance(j) = radius * mesh%dlat
+      mesh%cell_lon_distance(j) = 2.0 * mesh%lon_edge_area(j) / mesh%vertex_lat_distance(j) 
     end do 
 
     do j = 1, mesh%num_half_lat
       if (j ==1 .or.j == mesh%num_half_lat) then
-        mesh%cell_lat_distance(j) = 0 
         mesh%vertex_lon_distance(j) = 0 
+        mesh%cell_lat_distance(j) = 0 
       else
-        mesh%cell_lat_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
-        mesh%vertex_lon_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%cell_lat_distance(j)
+        mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
+        mesh%cell_lat_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%vertex_lon_distance(j)
       end if 
     end do 
 

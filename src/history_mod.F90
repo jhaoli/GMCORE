@@ -73,7 +73,7 @@ contains
     call io_add_var('dgd',          'debug', long_name='dgd',                 units='', dim_names=['lon ', 'lat ', 'time'])
 !     call io_add_var('iap_u',        'debug', long_name='IAP u',               units='', dim_names=['ilon', 'lat ', 'time'])
 !     call io_add_var('iap_v',        'debug', long_name='IAP v',               units='', dim_names=['lon ', 'ilat', 'time'])
-    call io_add_var('hd_corner',       'debug', long_name='thickness corner', units='', dim_names=['ilon', 'ilat', 'time'])
+    call io_add_var('gd_corner',    'debug', long_name='geopotential height corner', units='', dim_names=['ilon', 'ilat', 'time'])
     call io_add_var('u_nonlinear',  'debug', long_name='u_none_linear_force', units='', dim_names=['ilon', 'lat ', 'time'])
     call io_add_var('v_nonlinear',  'debug', long_name='v_none_linear_force', units='', dim_names=['lon ', 'ilat', 'time'])
     call io_add_var('normal_lon_flux', 'debug', long_name='normal lon flux',      units='', dim_names=['ilon', 'lat ', 'time'])
@@ -81,8 +81,8 @@ contains
     call io_add_var('center_energy', 'debug', long_name='cell center energy', units='', dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('PV',           'debug', long_name='potential vorticity', units='', dim_names=['ilon', 'ilat', 'time'])
     call io_add_var('kinetic_energy','debug', long_name='kinetic vorticity',  units='', dim_names=['lon ', 'lat ', 'time'])
-    call io_add_var('tangent_lon_flux','debug', long_name='tangent flux on lon',units='', dim_names=['ilon', 'lat ', 'time'])
-    call io_add_var('tangent_lat_flux','debug', long_name='tangent flux on lat',units='', dim_names=['lon ', 'ilat', 'time'])
+    call io_add_var('mass_flux_lat_t','debug', long_name='tangent flux on lat',units='', dim_names=['ilon', 'lat ', 'time'])
+    call io_add_var('mass_flux_lon_t','debug', long_name='tangent flux on lon',units='', dim_names=['lon ', 'ilat', 'time'])
     if (.not. allocated(u)) call parallel_allocate(u)
     if (.not. allocated(v)) call parallel_allocate(v)
     if (.not. allocated(gh)) call parallel_allocate(gh)
@@ -95,6 +95,7 @@ contains
 
     if (allocated(u)) deallocate(u)
     if (allocated(v)) deallocate(v)
+    if (allocated(gh)) deallocate(gh)
 
     call log_notice('History module is finalized.')
 
@@ -160,9 +161,9 @@ contains
     call io_output('center_energy', tend%diag%energy(1:mesh%num_full_lon,1:mesh%num_full_lat),  'debug')
     call io_output('kinetic_energy', tend%diag%kinetic_energy(1:mesh%num_full_lon,1:mesh%num_full_lat),  'debug')
     call io_output('PV',            tend%diag%pot_vor(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
-    call io_output('hd_corner',     tend%diag%hd_corner(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
-    call io_output('tangent_lon_flux', tend%diag%tangent_lon_flux(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
-    call io_output('tangent_lat_flux', tend%diag%tangent_lat_flux(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+    call io_output('gd_corner',     tend%diag%gd_corner(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
+    call io_output('mass_flux_lat_t', tend%diag%mass_flux_lat_t(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
+    call io_output('mass_flux_lon_t', tend%diag%mass_flux_lon_t(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
     call io_end_output('debug')
 
   end subroutine history_write_tendency

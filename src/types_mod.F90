@@ -40,14 +40,16 @@ module types_mod
   end type static_type
 
   type dia_type
-    real, allocatable :: hd_corner(:,:)
+    real, allocatable :: gd_corner(:,:)
     real, allocatable :: pot_vor(:,:)
     real, allocatable :: kinetic_energy(:,:)
+    real, allocatable :: gd_lon(:,:)
+    real, allocatable :: gd_lat(:,:)
     real, allocatable :: energy(:,:)
     real, allocatable :: normal_lon_flux(:,:)
     real, allocatable :: normal_lat_flux(:,:)
-    real, allocatable :: tangent_lon_flux(:,:)
-    real, allocatable :: tangent_lat_flux(:,:) 
+    real, allocatable :: mass_flux_lat_t(:,:)
+    real, allocatable :: mass_flux_lon_t(:,:) 
     real, allocatable :: pv_lon(:,:)
     real, allocatable :: pv_lat(:,:)
   end type dia_type
@@ -125,16 +127,18 @@ contains
     if (.not. allocated(tend%dv))           call parallel_allocate(tend%dv,             half_lat=.true.)
     if (.not. allocated(tend%mass_div))     call parallel_allocate(tend%mass_div)
     if (.not. allocated(tend%dgd))          call parallel_allocate(tend%dgd)
-    if (.not. allocated(tend%diag%hd_corner)) call parallel_allocate(tend%diag%hd_corner, half_lon=.true., half_lat=.true.)
+    if (.not. allocated(tend%diag%gd_corner)) call parallel_allocate(tend%diag%gd_corner, half_lon=.true., half_lat=.true.)
     if (.not. allocated(tend%diag%pot_vor)) call parallel_allocate(tend%diag%pot_vor, half_lon=.true., half_lat=.true.)
     if (.not. allocated(tend%diag%kinetic_energy))  call parallel_allocate(tend%diag%kinetic_energy)
     if (.not. allocated(tend%diag%energy))  call parallel_allocate(tend%diag%energy)
     if (.not. allocated(tend%diag%normal_lon_flux))  call parallel_allocate(tend%diag%normal_lon_flux, half_lon=.true.)
     if (.not. allocated(tend%diag%normal_lat_flux))  call parallel_allocate(tend%diag%normal_lat_flux, half_lat=.true.)
-    if (.not. allocated(tend%diag%tangent_lon_flux))  call parallel_allocate(tend%diag%tangent_lon_flux, half_lon=.true.)
-    if (.not. allocated(tend%diag%tangent_lat_flux))  call parallel_allocate(tend%diag%tangent_lat_flux, half_lat=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lat_t))  call parallel_allocate(tend%diag%mass_flux_lat_t, half_lon=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lon_t))  call parallel_allocate(tend%diag%mass_flux_lon_t, half_lat=.true.)
     if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.)
     if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.)
+    if (.not. allocated(tend%diag%gd_lon))    call parallel_allocate(tend%diag%gd_lon, half_lon=.true.)
+    if (.not. allocated(tend%diag%gd_lat))    call parallel_allocate(tend%diag%gd_lat, half_lat=.true.)
   end subroutine allocate_tend_data
 
   subroutine deallocate_coef_data(coef)
@@ -182,16 +186,18 @@ contains
     if (allocated(tend%du))           deallocate(tend%du)
     if (allocated(tend%dv))           deallocate(tend%dv)
     if (allocated(tend%dgd))          deallocate(tend%dgd)
-    if (allocated(tend%diag%hd_corner)) deallocate(tend%diag%hd_corner)
+    if (allocated(tend%diag%gd_corner)) deallocate(tend%diag%gd_corner)
     if (allocated(tend%diag%pot_vor)) deallocate(tend%diag%pot_vor)
     if (allocated(tend%diag%energy))  deallocate(tend%diag%energy)
     if (allocated(tend%diag%kinetic_energy))  deallocate(tend%diag%kinetic_energy)
     if (allocated(tend%diag%normal_lon_flux))  deallocate(tend%diag%normal_lon_flux)
     if (allocated(tend%diag%normal_lat_flux))  deallocate(tend%diag%normal_lat_flux)
-    if (allocated(tend%diag%tangent_lon_flux))  deallocate(tend%diag%tangent_lon_flux)
-    if (allocated(tend%diag%tangent_lat_flux))  deallocate(tend%diag%tangent_lat_flux)
+    if (allocated(tend%diag%mass_flux_lat_t))  deallocate(tend%diag%mass_flux_lat_t)
+    if (allocated(tend%diag%mass_flux_lon_t))  deallocate(tend%diag%mass_flux_lon_t)
     if (allocated(tend%diag%pv_lon))  deallocate(tend%diag%pv_lon)
     if (allocated(tend%diag%pv_lat))  deallocate(tend%diag%pv_lat)
+    if (allocated(tend%diag%gd_lon))  deallocate(tend%diag%gd_lon)
+    if (allocated(tend%diag%gd_lat))  deallocate(tend%diag%gd_lat)
     end subroutine deallocate_tend_data
 
 

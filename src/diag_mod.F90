@@ -52,14 +52,9 @@ contains
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-!         um1 = state%u(i-1,j)
-!         up1 = state%u(i,j)
-!         vm1 = state%v(i,j) * mesh%half_cos_lat(j)
-!         vp1 = state%v(i,j+1) * mesh%half_cos_lat(j+1)
-!         diag%div(i,j) = (up1 - um1) / coef%full_dlon(j) + (vp1 - vm1) / coef%full_dlat(j)
-        diag%div(i,j) = ((state%u(i,j) - state%u(i-1,j)) * mesh%cell_lon_distance(j) + &
-                         (state%v(i,j+1) * mesh%cell_lat_distance(j+1) -&
-                          state%v(i,j) * mesh%cell_lat_distance(j))) / mesh%cell_area(j)
+        diag%div(i,j) = ((state%u(i,j) - state%u(i-1,j)) * mesh%vertex_lat_distance(j) + &
+                         (state%v(i,j+1) * mesh%vertex_lon_distance(j+1) -&
+                          state%v(i,j) * mesh%vertex_lon_distance(j))) / mesh%cell_area(j)  
       end do
     end do
     call parallel_fill_halo(diag%div, all_halo=.true.)
