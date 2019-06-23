@@ -80,8 +80,8 @@ contains
     call io_add_var('center_energy', 'debug', long_name='cell center energy', units='', dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('PV',           'debug', long_name='potential vorticity', units='', dim_names=['ilon', 'ilat', 'time'])
     call io_add_var('kinetic_energy','debug', long_name='kinetic vorticity',  units='', dim_names=['lon ', 'lat ', 'time'])
-    call io_add_var('tangent_lon_flux','debug', long_name='tangential_flux on u',units='', dim_names=['ilon', 'lat ', 'time'])
-    call io_add_var('tangent_lat_flux','debug', long_name='tangential_flux on v',units='', dim_names=['lon ', 'ilat', 'time'])
+    call io_add_var('mass_flux_lon_t','debug', long_name='tangential_flux on u',units='', dim_names=['ilon', 'lat ', 'time'])
+    call io_add_var('mass_flux_lat_t','debug', long_name='tangential_flux on v',units='', dim_names=['lon ', 'ilat', 'time'])
     !!
     call io_add_var('tangent_wind_lon', 'debug', long_name='tangent wind lon', units='ms-1', dim_names=['ilon', 'lat ', 'time'])
     call io_add_var('tangent_wind_lat', 'debug', long_name='tangent wind lat', units='ms-1', dim_names=['lon ', 'ilat', 'time'])
@@ -168,8 +168,8 @@ contains
     call io_output('kinetic_energy', tend%diag%kinetic_energy(1:mesh%num_full_lon,1:mesh%num_full_lat),  'debug')
     call io_output('PV',            tend%diag%pot_vor(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
     call io_output('gd_corner',     tend%diag%gd_corner(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
-    call io_output('tangent_lon_flux', tend%diag%tangent_lon_flux(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
-    call io_output('tangent_lat_flux', tend%diag%tangent_lat_flux(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+    call io_output('mass_flux_lon_t', tend%diag%mass_flux_lon_t(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
+    call io_output('mass_flux_lat_t', tend%diag%mass_flux_lat_t(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
 !!
     call io_output('tangent_wind_lon', tend%diag%tangent_wind_lon(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
     call io_output('tangent_wind_lat', tend%diag%tangent_wind_lat(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')

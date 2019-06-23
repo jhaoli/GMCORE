@@ -48,8 +48,8 @@ module types_mod
     real, allocatable :: gd_lat(:,:)
     real, allocatable :: normal_lon_flux(:,:)
     real, allocatable :: normal_lat_flux(:,:)
-    real, allocatable :: tangent_lon_flux(:,:)
-    real, allocatable :: tangent_lat_flux(:,:) 
+    real, allocatable :: mass_flux_lon_t(:,:)
+    real, allocatable :: mass_flux_lat_t(:,:) 
     real, allocatable :: pv_lon(:,:), pv_lat(:,:)
     !
     real, allocatable :: tangent_wind_lon(:,:)
@@ -145,8 +145,8 @@ contains
     if (.not. allocated(tend%diag%energy))  call parallel_allocate(tend%diag%energy)
     if (.not. allocated(tend%diag%normal_lon_flux))  call parallel_allocate(tend%diag%normal_lon_flux, half_lon=.true.)
     if (.not. allocated(tend%diag%normal_lat_flux))  call parallel_allocate(tend%diag%normal_lat_flux, half_lat=.true.)
-    if (.not. allocated(tend%diag%tangent_lon_flux))  call parallel_allocate(tend%diag%tangent_lon_flux, half_lon=.true.)
-    if (.not. allocated(tend%diag%tangent_lat_flux))  call parallel_allocate(tend%diag%tangent_lat_flux, half_lat=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lon_t))  call parallel_allocate(tend%diag%mass_flux_lon_t, half_lon=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lat_t))  call parallel_allocate(tend%diag%mass_flux_lat_t, half_lat=.true.)
     if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.)
     if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.) 
   !!
@@ -213,8 +213,8 @@ contains
     if (allocated(tend%diag%kinetic_energy))  deallocate(tend%diag%kinetic_energy)
     if (allocated(tend%diag%normal_lon_flux))  deallocate(tend%diag%normal_lon_flux)
     if (allocated(tend%diag%normal_lat_flux))  deallocate(tend%diag%normal_lat_flux)
-    if (allocated(tend%diag%tangent_lon_flux))  deallocate(tend%diag%tangent_lon_flux)
-    if (allocated(tend%diag%tangent_lat_flux))  deallocate(tend%diag%tangent_lat_flux)
+    if (allocated(tend%diag%mass_flux_lon_t))  deallocate(tend%diag%mass_flux_lon_t)
+    if (allocated(tend%diag%mass_flux_lat_t))  deallocate(tend%diag%mass_flux_lat_t)
     if (allocated(tend%diag%pv_lon))  deallocate(tend%diag%pv_lon)
     if (allocated(tend%diag%pv_lat))  deallocate(tend%diag%pv_lat)
     !!

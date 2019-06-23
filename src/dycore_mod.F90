@@ -270,7 +270,7 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%diag%normal_lon_flux(i,j) = tend%diag%gd_lon(i,j) / g * state%u(i,j)  
+        tend%diag%normal_lon_flux(i,j) = tend%diag%gd_lon(i,j) / g * state%u(i,j)  
       end do
     end do 
       tend%diag%normal_lon_flux(:,1) = 0.0
@@ -295,8 +295,6 @@ contains
                                    mesh%lon_edge_right_area(j) * state%gd(i+1,j)) / mesh%lon_edge_area(j) 
       end do
     end do 
-      tend%diag%normal_lon_flux(:,1) = 0.0
-      tend%diag%normal_lon_flux(:,parallel%full_lat_end_idx) = 0.0
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
@@ -311,26 +309,57 @@ contains
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer :: i, j
-
+    real sp, np 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         tend%diag%gd_corner(i,j) = 1.0 / mesh%vertex_area(j) * (mesh%subcell_area(1,j+1) * (state%gd(i,j+1) + state%gd(i+1,j+1)) +&
                                                                 mesh%subcell_area(2,j  ) * (state%gd(i,j  ) + state%gd(i+1,j  ))) 
-        diag%vor(i,j) = 1.0 / mesh%vertex_area(j) * (state%u(i,j  ) * mesh%vertex_lat_distance(j  ) +&
-                                                     state%v(i+1,j) * mesh%vertex_lon_distance(j  ) -&
-                                                     state%u(i,j+1) * mesh%vertex_lat_distance(j+1)-&
-                                                     state%v(i,j  ) * mesh%vertex_lon_distance(j  ))
+        diag%vor(i,j) = 1.0 / mesh%vertex_area(j) * (state%u(i,j  ) * mesh%cell_lon_distance(j  ) +&
+                                                     state%v(i+1,j) * mesh%cell_lat_distance(j  ) -&
+                                                     state%u(i,j+1) * mesh%cell_lon_distance(j+1)-&
+                                                     state%v(i,j  ) * mesh%cell_lat_distance(j  ))
         tend%diag%pot_vor(i,j) = (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g)
+        diag%pv(i,j) = tend%diag%pot_vor(i,j)
       end do
     end do
 
-     j = parallel%half_lat_start_idx
-!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
-     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon
-     j = parallel%half_lat_end_idx
-!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
-     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon 
+!      j = parallel%half_lat_start_idx
+! !      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+!      tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon
+!      j = parallel%half_lat_end_idx
+! !      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+!      tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon 
+   
+    j = parallel%half_lat_start_idx
+    sp = 0.0
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      sp =  sp - (state%u(i,j+1) * mesh%cell_lon_distance(j+1))
+    end do 
+    
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      diag%vor(i,j) =  sp / (mesh%num_half_lon * mesh%vertex_area(j))
+    end do
+    
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      tend%diag%pot_vor(i,j) =  (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g) 
+      diag%pv(i,j) = tend%diag%pot_vor(i,j)
+    end do
+    
 
+    j = parallel%half_lat_end_idx
+    np = 0.0
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      np =  np + (state%u(i,j) * mesh%cell_lon_distance(j))
+    end do 
+
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      diag%vor(i,j) =  np / (mesh%num_half_lon * mesh%vertex_area(j))
+    end do
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      tend%diag%pot_vor(i,j) =  (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g) 
+      diag%pv(i,j) = tend%diag%pot_vor(i,j)
+    end do
+    
     call parallel_fill_halo(tend%diag%pot_vor, all_halo=.true.)
     
   end subroutine calc_pv_on_vertex
@@ -406,27 +435,29 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-         tend%diag%tangent_lon_flux(i,j) = 0.25 / mesh%vertex_lat_distance(j) *&
-                                 (mesh%cell_lat_distance(j  ) * tend%diag%normal_lat_flux(i,j    ) +&
-                                  mesh%cell_lat_distance(j  ) * tend%diag%normal_lat_flux(i+1,j  ) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%normal_lat_flux(i,j-1  ) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%normal_lat_flux(i+1,j-1) )
+         tend%diag%mass_flux_lon_t(i,j) = 0.25 / mesh%cell_lon_distance(j) *&
+                                 (mesh%vertex_lon_distance(j  ) * tend%diag%normal_lat_flux(i,j    ) +&
+                                  mesh%vertex_lon_distance(j  ) * tend%diag%normal_lat_flux(i+1,j  ) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%normal_lat_flux(i,j-1  ) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%normal_lat_flux(i+1,j-1) )
+ 
       end do 
     end do 
-      tend%diag%tangent_lon_flux(:,1) = 0.0
-      tend%diag%tangent_lon_flux(:,parallel%full_lat_end_idx) = 0.0
+      tend%diag%mass_flux_lon_t(:,1) = 0.0
+      tend%diag%mass_flux_lon_t(:,parallel%full_lat_end_idx) = 0.0
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%tangent_lat_flux(i,j) = 0.25 / mesh%vertex_lon_distance(j) * &
-                                (mesh%cell_lon_distance(j+1) * tend%diag%normal_lon_flux(i-1,j+1) +&
-                                 mesh%cell_lon_distance(j+1) * tend%diag%normal_lon_flux(i,j+1  ) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%normal_lon_flux(i-1,j  ) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%normal_lon_flux(i,j    ))
+        tend%diag%mass_flux_lat_t(i,j) = 0.25 / mesh%cell_lat_distance(j) * &
+                                (mesh%vertex_lat_distance(j+1) * tend%diag%normal_lon_flux(i-1,j+1) +&
+                                 mesh%vertex_lat_distance(j+1) * tend%diag%normal_lon_flux(i,j+1  ) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%normal_lon_flux(i-1,j  ) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%normal_lon_flux(i,j    ))
+      
       end do 
     end do 
-    call parallel_fill_halo(tend%diag%tangent_lon_flux, all_halo=.true.)
-    call parallel_fill_halo(tend%diag%tangent_lat_flux, all_halo=.true.)
+    call parallel_fill_halo(tend%diag%mass_flux_lon_t, all_halo=.true.)
+    call parallel_fill_halo(tend%diag%mass_flux_lat_t, all_halo=.true.)
   end subroutine calc_tangent_mass_flux
 
   subroutine nonlinear_coriolis_operator_energy_conserve(state, tend)
@@ -450,21 +481,23 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%u_nonlinear(i,j) = 0.125 / mesh%vertex_lat_distance(j) *&
-                                 (mesh%cell_lat_distance(j  ) * tend%diag%normal_lat_flux(i,j    ) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i,  j  )) +&
-                                  mesh%cell_lat_distance(j  ) * tend%diag%normal_lat_flux(i+1,j  ) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i+1,j  )) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%normal_lat_flux(i,j-1  ) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i,j-1  )) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%normal_lat_flux(i+1,j-1) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i+1,j-1)) )
+        tend%u_nonlinear(i,j) = 0.125 / mesh%cell_lon_distance(j) *&
+                                 (mesh%vertex_lon_distance(j  ) * tend%diag%normal_lat_flux(i,j    ) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i,  j  )) +&
+                                  mesh%vertex_lon_distance(j  ) * tend%diag%normal_lat_flux(i+1,j  ) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i+1,j  )) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%normal_lat_flux(i,j-1  ) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i,j-1  )) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%normal_lat_flux(i+1,j-1) * (tend%diag%pv_lon(i,j) + tend%diag%pv_lat(i+1,j-1)) )
+           
       end do
     end do
     
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_nonlinear(i,j) = -0.125 / mesh%vertex_lon_distance(j) * &
-                                (mesh%cell_lon_distance(j+1) * tend%diag%normal_lon_flux(i-1,j+1) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i-1,j+1)) +&
-                                 mesh%cell_lon_distance(j+1) * tend%diag%normal_lon_flux(i,j+1  ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i,j+1  )) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%normal_lon_flux(i-1,j  ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i-1,j  )) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%normal_lon_flux(i,j    ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i,j    )))
+        tend%v_nonlinear(i,j) = -0.125 / mesh%cell_lat_distance(j) * &
+                                (mesh%vertex_lat_distance(j+1) * tend%diag%normal_lon_flux(i-1,j+1) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i-1,j+1)) +&
+                                 mesh%vertex_lat_distance(j+1) * tend%diag%normal_lon_flux(i,j+1  ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i,j+1  )) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%normal_lon_flux(i-1,j  ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i-1,j  )) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%normal_lon_flux(i,j    ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i,j    )))
+      
       end do 
     end do  
 
@@ -481,13 +514,13 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%u_nonlinear(i,j) = tend%diag%tangent_lon_flux(i,j) * tend%diag%pv_lon(i,j)
+        tend%u_nonlinear(i,j) = tend%diag%mass_flux_lon_t(i,j) * tend%diag%pv_lon(i,j)
       end do
     end do      
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_nonlinear(i,j) = -tend%diag%tangent_lat_flux(i,j) * tend%diag%pv_lat(i,j)
+        tend%v_nonlinear(i,j) = -tend%diag%mass_flux_lat_t(i,j) * tend%diag%pv_lat(i,j)
       end do 
     end do  
   end subroutine nonlinear_coriolis_operator_enstrophy_conserve
@@ -532,7 +565,7 @@ contains
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%diag%pv_lat(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i-1,j)) - &
-                  half_beta(j) * 0.5 * sign(1.0, tend%diag%tangent_lat_flux(i,j)) * (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) 
+                  half_beta(j) * 0.5 * sign(1.0, tend%diag%mass_flux_lat_t(i,j)) * (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) 
       end do 
     end do 
 
@@ -542,7 +575,7 @@ contains
           tend%diag%pv_lon(i,j) = 0.0
         else
           tend%diag%pv_lon(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j-1)) - &
-                 full_beta(j) * 0.5 * sign(1.0, tend%diag%tangent_lon_flux(i,j)) * (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i,j-1))
+                 full_beta(j) * 0.5 * sign(1.0, tend%diag%mass_flux_lon_t(i,j)) * (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i,j-1))
         end if 
      end do 
     end do
@@ -566,12 +599,12 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%diag%tangent_wind_lon(i,j) = 0.25 / mesh%vertex_lat_distance(j) *&
-                                 (mesh%cell_lat_distance(j  ) * state%v(i,j    ) +&
-                                  mesh%cell_lat_distance(j  ) * state%v(i+1,j  ) +&
-                                  mesh%cell_lat_distance(j-1) * state%v(i,j-1  ) +&
-                                  mesh%cell_lat_distance(j-1) * state%v(i+1,j-1) )
-        tend%diag%gradient_pv_lon(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i,j-1)) / mesh%cell_lon_distance(j)
+        tend%diag%tangent_wind_lon(i,j) = 0.25 / mesh%cell_lon_distance(j) *&
+                                 (mesh%vertex_lon_distance(j  ) * state%v(i,j    ) +&
+                                  mesh%vertex_lon_distance(j  ) * state%v(i+1,j  ) +&
+                                  mesh%vertex_lon_distance(j-1) * state%v(i,j-1  ) +&
+                                  mesh%vertex_lon_distance(j-1) * state%v(i+1,j-1) )
+        tend%diag%gradient_pv_lon(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i,j-1)) / mesh%vertex_lat_distance(j)
       end do 
     end do 
     tend%diag%tangent_wind_lon(:,parallel%full_lat_start_idx) = 0.0 
@@ -581,12 +614,12 @@ contains
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%tangent_wind_lat(i,j) = 0.25 / mesh%vertex_lon_distance(j) * &
-                                (mesh%cell_lon_distance(j+1) * state%u(i-1,j+1) +&
-                                 mesh%cell_lon_distance(j+1) * state%u(i,j+1  ) +&
-                                 mesh%cell_lon_distance(j  ) * state%u(i-1,j  ) +&
-                                 mesh%cell_lon_distance(j  ) * state%u(i,j    ))
-        tend%diag%gradient_pv_lat(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) / mesh%cell_lat_distance(j)
+        tend%diag%tangent_wind_lat(i,j) = 0.25 / mesh%cell_lat_distance(j) * &
+                                (mesh%vertex_lat_distance(j+1) * state%u(i-1,j+1) +&
+                                 mesh%vertex_lat_distance(j+1) * state%u(i,j+1  ) +&
+                                 mesh%vertex_lat_distance(j  ) * state%u(i-1,j  ) +&
+                                 mesh%vertex_lat_distance(j  ) * state%u(i,j    ))
+        tend%diag%gradient_pv_lat(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) / mesh%vertex_lon_distance(j)
       end do 
     end do 
     call parallel_fill_halo(tend%diag%tangent_wind_lon, all_halo=.true.)
@@ -596,21 +629,21 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%diag%tangent_gradient_pv_lon(i,j) = 0.25 / mesh%vertex_lat_distance(j) *&
-                                 (mesh%cell_lat_distance(j  ) * tend%diag%gradient_pv_lat(i,j    ) +&
-                                  mesh%cell_lat_distance(j  ) * tend%diag%gradient_pv_lat(i+1,j  ) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%gradient_pv_lat(i,j-1  ) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%gradient_pv_lat(i+1,j-1) )
+        tend%diag%tangent_gradient_pv_lon(i,j) = 0.25 / mesh%cell_lon_distance(j) *&
+                                 (mesh%vertex_lon_distance(j  ) * tend%diag%gradient_pv_lat(i,j    ) +&
+                                  mesh%vertex_lon_distance(j  ) * tend%diag%gradient_pv_lat(i+1,j  ) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%gradient_pv_lat(i,j-1  ) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%gradient_pv_lat(i+1,j-1) )
       end do 
     end do 
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%tangent_gradient_pv_lat(i,j) = 0.25 / mesh%vertex_lon_distance(j) * &
-                                (mesh%cell_lon_distance(j+1) * tend%diag%gradient_pv_lon(i-1,j+1) +&
-                                 mesh%cell_lon_distance(j+1) * tend%diag%gradient_pv_lon(i,j+1  ) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%gradient_pv_lon(i-1,j  ) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%gradient_pv_lon(i,j    ))
+        tend%diag%tangent_gradient_pv_lat(i,j) = 0.25 / mesh%cell_lat_distance(j) * &
+                                (mesh%vertex_lat_distance(j+1) * tend%diag%gradient_pv_lon(i-1,j+1) +&
+                                 mesh%vertex_lat_distance(j+1) * tend%diag%gradient_pv_lon(i,j+1  ) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%gradient_pv_lon(i-1,j  ) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%gradient_pv_lon(i,j    ))
       end do     
     end do 
 
@@ -620,8 +653,8 @@ contains
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%diag%pv_lat(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i-1,j)) - &
-                                half_beta(j) * 0.25 * sign(1.0, tend%diag%tangent_wind_lat(i,j)) * tend%diag%gradient_pv_lat(i,j) * mesh%cell_lat_distance(j) - &
-                                half_beta(j) * 0.25 * sign(1.0, state%v(i,j)) * tend%diag%tangent_gradient_pv_lat(i,j) * mesh%vertex_lon_distance(j) 
+                                half_beta(j) * 0.25 * sign(1.0, tend%diag%tangent_wind_lat(i,j)) * tend%diag%gradient_pv_lat(i,j) * mesh%vertex_lon_distance(j) - &
+                                half_beta(j) * 0.25 * sign(1.0, state%v(i,j)) * tend%diag%tangent_gradient_pv_lat(i,j) * mesh%cell_lat_distance(j) 
       end do 
     end do 
 
@@ -631,8 +664,8 @@ contains
           tend%diag%pv_lon(i,j) = 0.0
         else
           tend%diag%pv_lon(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j-1)) -&
-                                  full_beta(j) * 0.25 * sign(1.0, state%u(i,j)) * tend%diag%tangent_gradient_pv_lon(i,j) * mesh%vertex_lat_distance(j)-&
-                                  full_beta(j) * 0.25 * sign(1.0, tend%diag%tangent_wind_lon(i,j)) * tend%diag%gradient_pv_lon(i,j) * mesh%cell_lon_distance(j)
+                                  full_beta(j) * 0.25 * sign(1.0, state%u(i,j)) * tend%diag%tangent_gradient_pv_lon(i,j) * mesh%cell_lon_distance(j)-&
+                                  full_beta(j) * 0.25 * sign(1.0, tend%diag%tangent_wind_lon(i,j)) * tend%diag%gradient_pv_lon(i,j) * mesh%vertex_lat_distance(j)
         end if 
      end do 
     end do
@@ -664,12 +697,12 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%diag%tangent_wind_lon(i,j) = 0.25 / mesh%vertex_lat_distance(j) *&
-                                 (mesh%cell_lat_distance(j  ) * state%v(i,j    ) +&
-                                  mesh%cell_lat_distance(j  ) * state%v(i+1,j  ) +&
-                                  mesh%cell_lat_distance(j-1) * state%v(i,j-1  ) +&
-                                  mesh%cell_lat_distance(j-1) * state%v(i+1,j-1) )
-        tend%diag%gradient_pv_lon(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i,j-1)) / mesh%cell_lon_distance(j)
+        tend%diag%tangent_wind_lon(i,j) = 0.25 / mesh%cell_lon_distance(j) *&
+                                 (mesh%vertex_lon_distance(j  ) * state%v(i,j    ) +&
+                                  mesh%vertex_lon_distance(j  ) * state%v(i+1,j  ) +&
+                                  mesh%vertex_lon_distance(j-1) * state%v(i,j-1  ) +&
+                                  mesh%vertex_lon_distance(j-1) * state%v(i+1,j-1) )
+        tend%diag%gradient_pv_lon(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i,j-1)) / mesh%vertex_lat_distance(j)
       end do 
     end do 
     tend%diag%tangent_wind_lon(:,parallel%full_lat_start_idx) = 0.0 
@@ -679,12 +712,12 @@ contains
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%tangent_wind_lat(i,j) = 0.25 / mesh%vertex_lon_distance(j) * &
-                                (mesh%cell_lon_distance(j+1) * state%u(i-1,j+1) +&
-                                 mesh%cell_lon_distance(j+1) * state%u(i,j+1  ) +&
-                                 mesh%cell_lon_distance(j  ) * state%u(i-1,j  ) +&
-                                 mesh%cell_lon_distance(j  ) * state%u(i,j    ))
-        tend%diag%gradient_pv_lat(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) / mesh%cell_lat_distance(j)
+        tend%diag%tangent_wind_lat(i,j) = 0.25 / mesh%cell_lat_distance(j) * &
+                                (mesh%vertex_lat_distance(j+1) * state%u(i-1,j+1) +&
+                                 mesh%vertex_lat_distance(j+1) * state%u(i,j+1  ) +&
+                                 mesh%vertex_lat_distance(j  ) * state%u(i-1,j  ) +&
+                                 mesh%vertex_lat_distance(j  ) * state%u(i,j    ))
+        tend%diag%gradient_pv_lat(i,j) = (tend%diag%pot_vor(i,j) - tend%diag%pot_vor(i-1,j)) / mesh%vertex_lon_distance(j)
       end do 
     end do 
     call parallel_fill_halo(tend%diag%tangent_wind_lon, all_halo=.true.)
@@ -694,21 +727,21 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%diag%tangent_gradient_pv_lon(i,j) = 0.25 / mesh%vertex_lat_distance(j) *&
-                                 (mesh%cell_lat_distance(j  ) * tend%diag%gradient_pv_lat(i,j    ) +&
-                                  mesh%cell_lat_distance(j  ) * tend%diag%gradient_pv_lat(i+1,j  ) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%gradient_pv_lat(i,j-1  ) +&
-                                  mesh%cell_lat_distance(j-1) * tend%diag%gradient_pv_lat(i+1,j-1) )
+        tend%diag%tangent_gradient_pv_lon(i,j) = 0.25 / mesh%cell_lon_distance(j) *&
+                                 (mesh%vertex_lon_distance(j  ) * tend%diag%gradient_pv_lat(i,j    ) +&
+                                  mesh%vertex_lon_distance(j  ) * tend%diag%gradient_pv_lat(i+1,j  ) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%gradient_pv_lat(i,j-1  ) +&
+                                  mesh%vertex_lon_distance(j-1) * tend%diag%gradient_pv_lat(i+1,j-1) )
       end do 
     end do 
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%tangent_gradient_pv_lat(i,j) = 0.25 / mesh%vertex_lon_distance(j) * &
-                                (mesh%cell_lon_distance(j+1) * tend%diag%gradient_pv_lon(i-1,j+1) +&
-                                 mesh%cell_lon_distance(j+1) * tend%diag%gradient_pv_lon(i,j+1  ) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%gradient_pv_lon(i-1,j  ) +&
-                                 mesh%cell_lon_distance(j  ) * tend%diag%gradient_pv_lon(i,j    ))
+        tend%diag%tangent_gradient_pv_lat(i,j) = 0.25 / mesh%cell_lat_distance(j) * &
+                                (mesh%vertex_lat_distance(j+1) * tend%diag%gradient_pv_lon(i-1,j+1) +&
+                                 mesh%vertex_lat_distance(j+1) * tend%diag%gradient_pv_lon(i,j+1  ) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%gradient_pv_lon(i-1,j  ) +&
+                                 mesh%vertex_lat_distance(j  ) * tend%diag%gradient_pv_lon(i,j    ))
       end do     
     end do 
 
@@ -747,16 +780,40 @@ contains
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer i, j 
-
+    real np, sp
     call calc_gd_on_edge(state, tend)
     call calc_pv_on_vertex(state, tend)
     
-     j = parallel%half_lat_start_idx
-!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
-     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon
-     j = parallel%half_lat_end_idx
-!      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
-     tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon 
+!      j = parallel%half_lat_start_idx
+! !      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+!      tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon
+!      j = parallel%half_lat_end_idx
+! !      tend%diag%pot_vor(:,j) = mean5_3(tend%diag%pot_vor(1:mesh%num_half_lon,j), 50)
+!      tend%diag%pot_vor(:,j) = sum(tend%diag%pot_vor(1:mesh%num_half_lon,j)) / mesh%num_half_lon 
+    
+    j = parallel%half_lat_start_idx
+    sp = 0.0
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      sp =  sp - (state%u(i,j+1) * mesh%cell_lon_distance(j+1))
+    end do 
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      diag%vor(i,j) =  sp / (mesh%num_half_lon * mesh%vertex_area(j))
+    end do
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      tend%diag%pot_vor(i,j) =  (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g) 
+    end do
+
+    j = parallel%half_lat_end_idx
+    np = 0.0
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      np =  np + (state%u(i,j) * mesh%cell_lon_distance(j))
+    end do 
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      diag%vor(i,j) =  np / (mesh%num_half_lon * mesh%vertex_area(j))
+    end do
+    do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+      tend%diag%pot_vor(i,j) =  (diag%vor(i,j) + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g) 
+    end do
 
     diag%total_enstrophy = 0.0
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
@@ -776,13 +833,13 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%u_pgf(i,j) = -(tend%diag%energy(i+1,j) - tend%diag%energy(i,j)) / mesh%vertex_lat_distance(j)
+        tend%u_pgf(i,j) = -(tend%diag%energy(i+1,j) - tend%diag%energy(i,j)) / mesh%cell_lon_distance(j)
       end do
     end do
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_pgf(i,j) = -(tend%diag%energy(i,j+1) - tend%diag%energy(i,j)) / mesh%vertex_lon_distance(j)
+        tend%v_pgf(i,j) = -(tend%diag%energy(i,j+1) - tend%diag%energy(i,j)) / mesh%cell_lat_distance(j)
       end do
     end do
   end subroutine energy_gradient_operator
@@ -797,10 +854,10 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%mass_div(i,j) = -1.0 / mesh%cell_area(j) * (tend%diag%normal_lat_flux(i,j  ) * mesh%cell_lat_distance(j  ) -&
-                                                         tend%diag%normal_lat_flux(i,j-1) * mesh%cell_lat_distance(j-1) +&
-                                                         tend%diag%normal_lon_flux(i,j  ) * mesh%cell_lon_distance(j  ) -&
-                                                         tend%diag%normal_lon_flux(i-1,j) * mesh%cell_lon_distance(j  ))
+        tend%mass_div(i,j) = -1.0 / mesh%cell_area(j) * (tend%diag%normal_lat_flux(i,j  ) * mesh%vertex_lon_distance(j  ) -&
+                                                         tend%diag%normal_lat_flux(i,j-1) * mesh%vertex_lon_distance(j-1) +&
+                                                         tend%diag%normal_lon_flux(i,j  ) * mesh%vertex_lat_distance(j  ) -&
+                                                         tend%diag%normal_lon_flux(i-1,j) * mesh%vertex_lat_distance(j  ))
       end do 
     end do 
     
@@ -808,7 +865,7 @@ contains
       j = parallel%full_lat_south_pole_idx
       sp = 0.0
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        sp = sp + tend%diag%normal_lat_flux(i,j) * mesh%cell_lat_distance(j)
+        sp = sp + tend%diag%normal_lat_flux(i,j) * mesh%vertex_lon_distance(j)
       end do
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%mass_div(i,j) = -sp / (mesh%num_full_lon * mesh%cell_area(j))
@@ -818,7 +875,7 @@ contains
       j = parallel%full_lat_north_pole_idx
       np = 0.0
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        np = np - tend%diag%normal_lat_flux(i,j-1) * mesh%cell_lat_distance(j-1)
+        np = np - tend%diag%normal_lat_flux(i,j-1) * mesh%vertex_lon_distance(j-1)
       end do
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%mass_div(i,j) = -np / (mesh%num_full_lon * mesh%cell_area(j))

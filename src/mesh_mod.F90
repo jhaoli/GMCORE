@@ -218,26 +218,26 @@ contains
 
     do j = 1, mesh%num_full_lat
       if (j == 1 .or. j == mesh%num_full_lat) then
-        mesh%cell_lon_distance(j) = radius * mesh%dlat * 0.5
-        mesh%vertex_lat_distance(j) = 0.0
+        mesh%vertex_lat_distance(j) = radius * mesh%dlat * 0.5
+        mesh%cell_lon_distance(j) = 0.0
       else
-        mesh%cell_lon_distance(j) = radius * mesh%dlat
-        mesh%vertex_lat_distance(j) = 2.0 * mesh%lon_edge_area(j) / mesh%cell_lon_distance(j)
+        mesh%vertex_lat_distance(j) = radius * mesh%dlat
+        mesh%cell_lon_distance(j) = 2.0 * mesh%lon_edge_area(j) / mesh%vertex_lat_distance(j)
       end if 
     end do 
 
     do j = 1, mesh%num_half_lat
-      mesh%cell_lat_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
-      mesh%vertex_lon_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%cell_lat_distance(j)
+      mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
+      mesh%cell_lat_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%vertex_lon_distance(j)
     end do 
 
     
     total_distance = 0.0
     do j = 1, mesh%num_half_lat
-      total_distance = total_distance + mesh%vertex_lon_distance(j)
+      total_distance = total_distance + mesh%cell_lat_distance(j)
     end do
     if (abs((pi * radius - total_distance) / ( pi * radius)) > 1.0e-4) then
-      call log_error('Failed to calculate vertex_lon_distance!', __FILE__, __LINE__)
+      call log_error('Failed to calculate cell_lat_distance!', __FILE__, __LINE__)
     end if
     call log_notice('Mesh module is initialized.')
 
