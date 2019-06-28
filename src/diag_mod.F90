@@ -64,6 +64,7 @@ contains
         diag%total_mass = diag%total_mass + mesh%cell_area(j) * state%gd(i,j)
       end do
     end do  
+
 !     diag%total_mass = diag%total_mass / (4 * pi * radius**2)
     if (ieee_is_nan(diag%total_mass)) then
       call log_error('Total mass is NaN!')
@@ -93,10 +94,12 @@ contains
     type(state_type), intent(in) :: state
 
     integer i, j
-    real hd_lon(parallel%half_lon_start_idx: parallel%half_lon_end_idx, &
-                parallel%full_lat_start_idx_no_pole: parallel%full_lat_end_idx_no_pole)
-    real hd_lat(parallel%full_lon_start_idx: parallel%full_lon_end_idx, &
-                parallel%half_lat_start_idx: parallel%half_lat_end_idx)
+    real,allocatable :: hd_lon(:,:), hd_lat(:,:)
+
+    allocate(hd_lon(parallel%half_lon_start_idx: parallel%half_lon_end_idx, &
+                    parallel%full_lat_start_idx_no_pole: parallel%full_lat_end_idx_no_pole))
+    allocate(hd_lat(parallel%full_lon_start_idx: parallel%full_lon_end_idx, &
+                    parallel%half_lat_start_idx: parallel%half_lat_end_idx))
 
     res = 0.0
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
@@ -120,5 +123,7 @@ contains
     end do
 
 !     res = res / (4 * pi * radius**2)
+    deallocate(hd_lon)
+    deallocate(hd_lat)
   end function diag_total_energy
 end module diag_mod

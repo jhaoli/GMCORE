@@ -46,11 +46,14 @@ module mesh_mod
     real, allocatable :: lat_edge_up_area(:)
     real, allocatable :: lat_edge_down_area(:)
     real, allocatable :: subcell_area(:,:)
-    ! edge distance of cell and vertex
+    ! cell distance and  vertex distance
     real, allocatable :: cell_lon_distance(:)
     real, allocatable :: cell_lat_distance(:)
     real, allocatable :: vertex_lon_distance(:)
     real, allocatable :: vertex_lat_distance(:)
+    ! weights for reconstructing tangent wind
+    real, allocatable :: full_tangent_wgt(:,:)
+    real, allocatable :: half_tangent_wgt(:,:)
   end type mesh_type
 
   type(mesh_type) mesh
@@ -96,6 +99,8 @@ contains
     allocate(mesh%cell_lat_distance(mesh%num_half_lat))
     allocate(mesh%vertex_lon_distance(mesh%num_half_lat))
     allocate(mesh%vertex_lat_distance(mesh%num_full_lat))
+    allocate(mesh%full_tangent_wgt(2,mesh%num_full_lat))
+    allocate(mesh%half_tangent_wgt(2,mesh%num_half_lat))
 
     mesh%dlon = 2 * pi / mesh%num_full_lon
     do i = 1, mesh%num_full_lon
@@ -198,7 +203,7 @@ contains
     do j = 1, mesh%num_half_lat
       total_area = total_area + mesh%lat_edge_area(j) * mesh%num_full_lon
     end do 
-    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-11) then
+    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-10) then
       call log_error('Failed to calculate edge area!')
     end if
 
@@ -239,8 +244,29 @@ contains
     if (abs((pi * radius - total_distance) / ( pi * radius)) > 1.0e-4) then
       call log_error('Failed to calculate cell_lat_distance!', __FILE__, __LINE__)
     end if
+    
+    do j = 1, mesh%num_full_lat
+      mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
+      mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
+!       print*, mesh%full_lat_deg(j), mesh%subcell_area(2,j), mesh%full_tangent_wgt(1,j), mesh%full_tangent_wgt(2,j)
+    end do 
+    do j = 1, mesh%num_half_lat
+      mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
+      mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j+1) / mesh%cell_area(j+1)
+!       print*, mesh%half_lat_deg(j), mesh%half_tangent_wgt(1,j), mesh%half_tangent_wgt(2,j)
+    end do 
+!     open(11,file='full_tangent_wgt.txt')
+!       do j = 1, mesh%num_full_lat
+!          write(11,*) mesh%full_lat_deg(j), mesh%full_tangent_wgt(1,j), mesh%full_tangent_wgt(2,j)
+!       end do 
+!     close(11) 
+!     open(11,file='half_tangent_wgt.txt')
+!       do j = 1, mesh%num_half_lat
+!          write(11,*) mesh%full_lat_deg(j), mesh%half_tangent_wgt(1,j), mesh%half_tangent_wgt(2,j)
+!       end do 
+!     close(11)    
     call log_notice('Mesh module is initialized.')
-
+! stop  
   end subroutine mesh_init
 
   subroutine mesh_final()
@@ -270,6 +296,8 @@ contains
     if (allocated(mesh%cell_lat_distance)) deallocate(mesh%cell_lat_distance)
     if (allocated(mesh%vertex_lon_distance)) deallocate(mesh%vertex_lon_distance)
     if (allocated(mesh%vertex_lat_distance)) deallocate(mesh%vertex_lat_distance)
+    if (allocated(mesh%full_tangent_wgt)) deallocate(mesh%full_tangent_wgt)
+    if (allocated(mesh%half_tangent_wgt)) deallocate(mesh%half_tangent_wgt)
 
     call log_notice('Mesh module is finalized.')
 
