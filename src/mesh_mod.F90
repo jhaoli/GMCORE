@@ -46,11 +46,14 @@ module mesh_mod
     real, allocatable :: lat_edge_up_area(:)
     real, allocatable :: lat_edge_down_area(:)
     real, allocatable :: subcell_area(:,:)
-    ! edge distance of cell and vertex
+    ! cell distance and vertex distance
     real, allocatable :: cell_lon_distance(:)
     real, allocatable :: cell_lat_distance(:)
     real, allocatable :: vertex_lon_distance(:)
     real, allocatable :: vertex_lat_distance(:)
+    ! weights for reconstructing tangent wind
+    real, allocatable :: full_tangent_wgt(:,:)
+    real, allocatable :: half_tangent_wgt(:,:)
   end type mesh_type
 
   type(mesh_type) mesh
@@ -97,6 +100,8 @@ contains
     allocate(mesh%cell_lat_distance(mesh%num_half_lat))
     allocate(mesh%vertex_lon_distance(mesh%num_half_lat))
     allocate(mesh%vertex_lat_distance(mesh%num_full_lat))
+    allocate(mesh%full_tangent_wgt(2,mesh%num_full_lat))
+    allocate(mesh%half_tangent_wgt(2,mesh%num_half_lat))
 
     mesh%dlon = 2 * pi / mesh%num_full_lon
     do i = 1, mesh%num_full_lon
@@ -231,8 +236,27 @@ contains
       end if 
     end do 
 
+    do j = 1, mesh%num_full_lat
+      mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
+      mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
+!       print*, mesh%full_lat_deg(j), mesh%full_tangent_wgt(1,j), mesh%full_tangent_wgt(2,j)
+    end do 
+    do j = 1, mesh%num_half_lat
+      if (j == 1) then
+        mesh%half_tangent_wgt(1,j) = 0.0
+        mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j  ) / mesh%cell_area(j  ) 
+      else if (j == mesh%num_half_lat) then
+        mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j-1) / mesh%cell_area(j-1)
+        mesh%half_tangent_wgt(2,j) = 0.0
+      else
+        mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j-1) / mesh%cell_area(j-1)
+        mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j  ) / mesh%cell_area(j  ) 
+      end if 
+!       print*, mesh%half_lat_deg(j), mesh%half_tangent_wgt(1,j), mesh%half_tangent_wgt(2,j)
+    end do
+     
     call log_notice('Mesh module is initialized.')
-    
+ 
   end subroutine mesh_init
 
   subroutine mesh_final()
@@ -262,7 +286,8 @@ contains
     if (allocated(mesh%cell_lat_distance)) deallocate(mesh%cell_lat_distance)
     if (allocated(mesh%vertex_lon_distance)) deallocate(mesh%vertex_lon_distance)
     if (allocated(mesh%vertex_lat_distance)) deallocate(mesh%vertex_lat_distance)
-
+    if (allocated(mesh%full_tangent_wgt)) deallocate(mesh%full_tangent_wgt)
+    if (allocated(mesh%half_tangent_wgt)) deallocate(mesh%half_tangent_wgt)
     call log_notice('Mesh module is finalized.')
 
   end subroutine mesh_final
