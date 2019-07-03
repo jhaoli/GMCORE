@@ -51,6 +51,7 @@ contains
     call io_add_var('te',   long_name='total energy',         units='m4 s-4', dim_names=['time'])
     call io_add_var('tm',   long_name='total mass',           units='m2 s-2', dim_names=['time'])
     call io_add_var('tes',  long_name='total potential enstrophy',units='m-1 s-2',dim_names=['time'])
+    call io_add_var('tpv',  long_name='total potential vorticity',units='m s-2',dim_names=['time'])
 
     call io_create_dataset(name='debug', desc=case_desc, file_prefix=case_name // '.debug')
     call io_add_dim('time', 'debug', add_var=.true.)
@@ -79,6 +80,8 @@ contains
     call io_add_var('normal_lat_flux', 'debug', long_name='normal v flux',    units='', dim_names=['lon ', 'ilat', 'time'])
     call io_add_var('center_energy', 'debug', long_name='cell center energy', units='', dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('PV',           'debug', long_name='potential vorticity', units='', dim_names=['ilon', 'ilat', 'time'])
+    call io_add_var('PV_on_lon',    'debug', long_name='PV on longitude',     units='', dim_names=['ilon', 'lat ', 'time'])
+    call io_add_var('PV_on_lat',    'debug', long_name='PV on latitude',      units='', dim_names=['lon ', 'ilat', 'time'])
     call io_add_var('kinetic_energy','debug', long_name='kinetic vorticity',  units='', dim_names=['lon ', 'lat ', 'time'])
     call io_add_var('mass_flux_lon_t','debug', long_name='tangential_flux on u',units='', dim_names=['ilon', 'lat ', 'time'])
     call io_add_var('mass_flux_lat_t','debug', long_name='tangential_flux on v',units='', dim_names=['lon ', 'ilat', 'time'])
@@ -139,6 +142,7 @@ contains
     call io_output('te',    diag%total_energy)
     call io_output('tm',    diag%total_mass)
     call io_output('tes',   diag%total_enstrophy)
+    call io_output('tpv',   diag%total_potential_vorticity)
     call io_end_output()
 
   end subroutine history_write_state
@@ -167,9 +171,11 @@ contains
     call io_output('center_energy', tend%diag%energy(1:mesh%num_full_lon,1:mesh%num_full_lat),  'debug')
     call io_output('kinetic_energy', tend%diag%kinetic_energy(1:mesh%num_full_lon,1:mesh%num_full_lat),  'debug')
     call io_output('PV',            tend%diag%pot_vor(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
+    call io_output('PV_on_lon',     tend%diag%pv_lon(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
+    call io_output('PV_on_lat',     tend%diag%pv_lat(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
     call io_output('gd_corner',     tend%diag%gd_corner(1:mesh%num_half_lon,1:mesh%num_half_lat),  'debug')
-    call io_output('mass_flux_lon_t', tend%diag%mass_flux_lon_t(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
-    call io_output('mass_flux_lat_t', tend%diag%mass_flux_lat_t(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+    call io_output('mass_flux_lon_t', tend%diag%mass_flux_lon_t(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
+    call io_output('mass_flux_lat_t', tend%diag%mass_flux_lat_t(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
 !!
     call io_output('tangent_wind_lon', tend%diag%tangent_wind_lon(1:mesh%num_half_lon,1:mesh%num_full_lat), 'debug')
     call io_output('tangent_wind_lat', tend%diag%tangent_wind_lat(1:mesh%num_full_lon,1:mesh%num_half_lat), 'debug')
