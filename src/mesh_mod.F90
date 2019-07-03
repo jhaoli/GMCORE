@@ -236,24 +236,36 @@ contains
       end if 
     end do 
 
-    do j = 1, mesh%num_full_lat
-      mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
-      mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
-!       print*, mesh%full_lat_deg(j), mesh%full_tangent_wgt(1,j), mesh%full_tangent_wgt(2,j)
-    end do 
-    do j = 1, mesh%num_half_lat
-      if (j == 1) then
-        mesh%half_tangent_wgt(1,j) = 0.0
-        mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j  ) / mesh%cell_area(j  ) 
-      else if (j == mesh%num_half_lat) then
-        mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j-1) / mesh%cell_area(j-1)
-        mesh%half_tangent_wgt(2,j) = 0.0
-      else
-        mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j-1) / mesh%cell_area(j-1)
-        mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j  ) / mesh%cell_area(j  ) 
-      end if 
-!       print*, mesh%half_lat_deg(j), mesh%half_tangent_wgt(1,j), mesh%half_tangent_wgt(2,j)
-    end do
+    select case(tangent_wgt_scheme)
+    case('thuburn09')
+      do j = 1, mesh%num_full_lat
+        mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
+        mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
+      end do 
+      do j = 1, mesh%num_half_lat
+        if (j == 1) then
+          mesh%half_tangent_wgt(1,j) = 0.0
+          mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j  ) / mesh%cell_area(j  ) 
+        else if (j == mesh%num_half_lat) then
+          mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j-1) / mesh%cell_area(j-1)
+          mesh%half_tangent_wgt(2,j) = 0.0
+        else
+          mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j-1) / mesh%cell_area(j-1)
+          mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j  ) / mesh%cell_area(j  ) 
+        end if 
+      end do
+    case('classic')
+      do j = 1, mesh%num_full_lat
+        mesh%full_tangent_wgt(1,j) = 0.25
+        mesh%full_tangent_wgt(2,j) = 0.25
+      end do 
+      do j = 1, mesh%num_half_lat
+        mesh%half_tangent_wgt(1,j) = 0.25
+        mesh%half_tangent_wgt(2,j) = 0.25
+      end do 
+    case default
+      call log_error('Unknown tangent_wgt_scheme.')
+    end select
      
     call log_notice('Mesh module is initialized.')
  

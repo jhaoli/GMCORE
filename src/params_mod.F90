@@ -65,6 +65,8 @@ module params_mod
   logical :: use_zonal_tend_filter = .true.
   integer :: zonal_tend_filter_cutoff_wavenumber(20) = 0
 
+  character(30) :: tangent_wgt_scheme ='classic'
+
   namelist /dycore_params/ &
     num_lon, &
     num_lat, &
@@ -86,6 +88,7 @@ module params_mod
     restart_file, &
     pv_scheme,&
     conserve_scheme,&
+    tangent_wgt_scheme,&
     time_scheme, &
     time_order, &
     qcon_modified, &

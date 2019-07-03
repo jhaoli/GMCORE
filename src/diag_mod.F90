@@ -101,18 +101,18 @@ contains
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         res = res + (mesh%lon_edge_left_area(j) * state%gd(i,j) + mesh%lon_edge_left_area(j) * state%gd(i+1,j)) /&
-              (mesh%lon_edge_area(j) * g) * state%u(i,j)**2 * mesh%lon_edge_area(j) / radius**2
+              (mesh%lon_edge_area(j) * g) * state%u(i,j)**2 * mesh%lon_edge_area(j) 
       end do
     end do
     do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         res = res + (mesh%lat_edge_up_area(j) * state%gd(i,j) + mesh%lat_edge_down_area(j) * state%gd(i,j-1)) /&
-             (mesh%lat_edge_area(j) * g) * state%v(i,j)**2 * mesh%lat_edge_area(j) / radius**2
+             (mesh%lat_edge_area(j) * g) * state%v(i,j)**2 * mesh%lat_edge_area(j) 
       end do
     end do
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        res = res + (state%gd(i,j)**2 / g * 0.5 + state%gd(i,j) * static%ghs(i,j) / g) * mesh%cell_area(j) / radius**2
+        res = res + (state%gd(i,j)**2 / g * 0.5 + state%gd(i,j) * static%ghs(i,j) / g) * mesh%cell_area(j)
       end do
     end do
 
