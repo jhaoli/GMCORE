@@ -244,7 +244,8 @@ contains
       call log_error('Failed to calculate cell_lat_distance!', __FILE__, __LINE__)
     end if
     
-    if (tangent_wgt_scheme == 'classic') then
+    select case(tangent_wgt_scheme)
+    case('classic')
       do j = 1, mesh%num_full_lat
         mesh%full_tangent_wgt(1,j) = 0.25
         mesh%full_tangent_wgt(2,j) = 0.25
@@ -253,7 +254,21 @@ contains
         mesh%half_tangent_wgt(1,j) = 0.25
         mesh%half_tangent_wgt(2,j) = 0.25
       end do 
-    elseif (tangent_wgt_scheme == 'thuburn09') then
+
+      do j = 1, mesh%num_full_lat
+        if (j == 1 .or. j == mesh%num_full_lat) then
+          mesh%vertex_lat_distance(j) = radius * mesh%dlat * 0.5
+          mesh%cell_lon_distance(j) = 0.0
+        else
+          mesh%vertex_lat_distance(j) = radius * mesh%dlat
+          mesh%cell_lon_distance(j) = radius * mesh%full_cos_lat(j) * mesh%dlon
+        end if 
+      end do 
+      do j = 1, mesh%num_half_lat
+        mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
+        mesh%cell_lat_distance(j) = radius * mesh%dlat
+      end do
+    case('thuburn09')
       do j = 1, mesh%num_full_lat
         mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
         mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
@@ -262,7 +277,9 @@ contains
         mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
         mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j+1) / mesh%cell_area(j+1)
       end do 
-    end if   
+    case default
+      call log_error('Unknown tangent_wgt_scheme.')
+    end select   
     call log_notice('Mesh module is initialized.') 
   end subroutine mesh_init
 

@@ -46,7 +46,7 @@ module params_mod
   character(30) time_scheme ! Time integration scheme
   integer time_order ! Time integration order (different schemes will have different meanings)
   logical qcon_modified ! Switch whether quadratic conservation modification is added
-  logical pv_pole_scheme ! Switch whether PV on ploe specification
+  logical :: pv_pole_scheme = .false. ! Switch whether PV on ploe specification
   ! Options:
   ! - csp1
   ! - csp2
