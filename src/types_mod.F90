@@ -145,8 +145,8 @@ contains
     if (.not. allocated(tend%diag%energy))  call parallel_allocate(tend%diag%energy)
     if (.not. allocated(tend%diag%normal_lon_flux))  call parallel_allocate(tend%diag%normal_lon_flux, half_lon=.true.)
     if (.not. allocated(tend%diag%normal_lat_flux))  call parallel_allocate(tend%diag%normal_lat_flux, half_lat=.true.)
-    if (.not. allocated(tend%diag%mass_flux_lon_t))  call parallel_allocate(tend%diag%mass_flux_lon_t, half_lon=.true.)
-    if (.not. allocated(tend%diag%mass_flux_lat_t))  call parallel_allocate(tend%diag%mass_flux_lat_t, half_lat=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lon_t))  call parallel_allocate(tend%diag%mass_flux_lon_t, half_lat=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lat_t))  call parallel_allocate(tend%diag%mass_flux_lat_t, half_lon=.true.)
     if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.)
     if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.) 
   !!

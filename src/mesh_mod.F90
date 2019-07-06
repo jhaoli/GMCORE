@@ -109,7 +109,7 @@ contains
       mesh%full_lon_deg(i) = mesh%full_lon(i) * rad_to_deg
       mesh%half_lon_deg(i) = mesh%half_lon(i) * rad_to_deg
     end do
-
+   
     mesh%dlat = pi / mesh%num_half_lat
     do j = 1, mesh%num_half_lat
       mesh%full_lat(j) = - 0.5 * pi + (j - 1) * mesh%dlat
@@ -179,7 +179,7 @@ contains
       mesh%lat_edge_down_area(j) = calc_area_with_last_small_arc(x, y, z)
       mesh%lat_edge_area(j) = mesh%lat_edge_up_area(j) + mesh%lat_edge_down_area(j)
     end do 
-
+ 
     total_area = 0.0
     do j = 1, mesh%num_full_lat
       total_area = total_area + mesh%cell_area(j) * mesh%num_full_lon
@@ -203,7 +203,7 @@ contains
     do j = 1, mesh%num_half_lat
       total_area = total_area + mesh%lat_edge_area(j) * mesh%num_full_lon
     end do 
-    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-10) then
+    if (abs((4 * pi * radius**2 - total_area) / (4 * pi * radius**2)) > 1.0e-9) then
       call log_error('Failed to calculate edge area!')
     end if
 
@@ -235,7 +235,6 @@ contains
       mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
       mesh%cell_lat_distance(j) = 2.0 * mesh%lat_edge_area(j) / mesh%vertex_lon_distance(j)
     end do 
-
     
     total_distance = 0.0
     do j = 1, mesh%num_half_lat
@@ -245,28 +244,40 @@ contains
       call log_error('Failed to calculate cell_lat_distance!', __FILE__, __LINE__)
     end if
     
-    do j = 1, mesh%num_full_lat
-      mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
-      mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
-!       print*, mesh%full_lat_deg(j), mesh%subcell_area(2,j), mesh%full_tangent_wgt(1,j), mesh%full_tangent_wgt(2,j)
-    end do 
-    do j = 1, mesh%num_half_lat
-      mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
-      mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j+1) / mesh%cell_area(j+1)
-!       print*, mesh%half_lat_deg(j), mesh%half_tangent_wgt(1,j), mesh%half_tangent_wgt(2,j)
-    end do 
-!     open(11,file='full_tangent_wgt.txt')
-!       do j = 1, mesh%num_full_lat
-!          write(11,*) mesh%full_lat_deg(j), mesh%full_tangent_wgt(1,j), mesh%full_tangent_wgt(2,j)
-!       end do 
-!     close(11) 
-!     open(11,file='half_tangent_wgt.txt')
-!       do j = 1, mesh%num_half_lat
-!          write(11,*) mesh%full_lat_deg(j), mesh%half_tangent_wgt(1,j), mesh%half_tangent_wgt(2,j)
-!       end do 
-!     close(11)    
-    call log_notice('Mesh module is initialized.')
-! stop  
+    select case(tangent_wgt_scheme)
+    case('classic')
+      do j = 1, mesh%num_full_lat
+        mesh%full_tangent_wgt(1,j) = 0.25
+        mesh%full_tangent_wgt(2,j) = 0.25
+      end do 
+      do j = 1, mesh%num_half_lat
+        mesh%half_tangent_wgt(1,j) = 0.25
+        mesh%half_tangent_wgt(2,j) = 0.25
+      end do 
+      do j = 1, mesh%num_full_lat 
+        if (j == 1 .or. j == mesh%num_full_lat) then
+          mesh%vertex_lat_distance(j) = radius * mesh%dlat * 0.5
+          mesh%cell_lon_distance(j) = 0.0
+        else
+          mesh%vertex_lat_distance(j) = radius * mesh%dlat
+          mesh%cell_lon_distance(j) = radius * mesh%full_cos_lat(j) * mesh%dlon
+        end if 
+      end do 
+      do j = 1, mesh%num_half_lat
+        mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
+        mesh%cell_lat_distance(j) = radius * mesh%dlat 
+      end do 
+    case('thuburn09')
+      do j = 1, mesh%num_full_lat
+        mesh%full_tangent_wgt(1,j) = mesh%subcell_area(2,j) / mesh%cell_area(j)
+        mesh%full_tangent_wgt(2,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
+      end do 
+      do j = 1, mesh%num_half_lat
+        mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
+        mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j+1) / mesh%cell_area(j+1)
+      end do 
+    end select   
+    call log_notice('Mesh module is initialized.') 
   end subroutine mesh_init
 
   subroutine mesh_final()

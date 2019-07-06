@@ -46,7 +46,7 @@ module params_mod
   character(30) time_scheme ! Time integration scheme
   integer time_order ! Time integration order (different schemes will have different meanings)
   logical qcon_modified ! Switch whether quadratic conservation modification is added
-
+  logical pv_pole_scheme ! Switch whether PV on ploe specification
   ! Options:
   ! - csp1
   ! - csp2
@@ -67,7 +67,8 @@ module params_mod
 
   logical :: use_zonal_tend_filter = .true.
   integer :: zonal_tend_filter_cutoff_wavenumber(20) = 0
-
+  character(30) :: tangent_wgt_scheme = 'classic'
+    
   namelist /dycore_params/ &
     num_lon, &
     num_lat, &
@@ -89,13 +90,12 @@ module params_mod
     restart_file, &
     pv_scheme, &
     conserve_scheme, &
+    pv_pole_scheme, &
     time_scheme, &
     time_order, &
     qcon_modified, &
     split_scheme, &
-    uv_adv_scheme, &
-    use_zonal_tend_filter, &
-    zonal_tend_filter_cutoff_wavenumber
+    tangent_wgt_scheme
 
 contains
 
