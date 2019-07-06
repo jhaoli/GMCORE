@@ -263,14 +263,14 @@ contains
         mesh%half_tangent_wgt(1,j) = 0.25
         mesh%half_tangent_wgt(2,j) = 0.25
       end do 
-      do j = 1, mesh%num_full_lat
-        mesh%vertex_lat_distance(j) = radius * mesh%dlat
-        mesh%cell_lon_distance(j)   = radius * mesh%full_cos_lat(j) * mesh%dlon
-      end do
-      do j = 1, mesh%num_half_lat
-        mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
-        mesh%cell_lat_distance(j) = radius * mesh%dlat
-      end do 
+!       do j = 1, mesh%num_full_lat
+!         mesh%vertex_lat_distance(j) = radius * mesh%dlat
+!         mesh%cell_lon_distance(j)   = radius * mesh%full_cos_lat(j) * mesh%dlon
+!       end do
+!       do j = 1, mesh%num_half_lat
+!         mesh%vertex_lon_distance(j) = radius * mesh%half_cos_lat(j) * mesh%dlon
+!         mesh%cell_lat_distance(j) = radius * mesh%dlat
+!       end do 
     case default
       call log_error('Unknown tangent_wgt_scheme.')
     end select
