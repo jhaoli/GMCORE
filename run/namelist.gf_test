@@ -1,21 +1,20 @@
 &dycore_params
 test_case = 'steady_geostrophic_flow'
-case_name = 'gf_c_u_01.1440x721.dt30'
+case_name = 'gf_c_u_01.180x91.dt240'
 case_desc = 'Steady_geostrophic flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
 run_days = 12
-num_lon = 1440
-num_lat = 721
-time_step_size = 30
+num_lon = 180
+num_lat = 91
+time_step_size = 240
 history_periods = '1 days'
 restart_period = '10 days'
 pv_scheme = 1 ! 1-'midpoint', 2-'upwind with beta'
+pv_pole_scheme = .false.
+tangent_wgt_scheme = 'thuburn09' ! 'classic' or 'thuburn09'
 conserve_scheme = 1 ! 1-'engergy-conserving', 2-'potential enstrophy conserving'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta2'
-uv_adv_scheme = 'center_diff' ! 'center_diff' or 'upwind' or 'weno'
 qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 subcycles = 8
-use_zonal_tend_filter = .false.
-zonal_tend_filter_cutoff_wavenumber = 4, 4, 4
 /
