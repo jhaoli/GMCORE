@@ -499,10 +499,10 @@ contains
     real :: half_beta(parallel%half_lat_start_idx: parallel%half_lat_end_idx)
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-        full_beta(j) = 4 / pi**2 * mesh%full_lat(j)**2
+        full_beta(j) = 2 / pi**2 * mesh%full_lat(j)**2
       end do
       do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
-        half_beta(j) = 4 / pi**2 * mesh%half_lat(j)**2
+        half_beta(j) = 2 / pi**2 * mesh%half_lat(j)**2
       end do
 
       do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx

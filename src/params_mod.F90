@@ -92,9 +92,7 @@ module params_mod
     time_scheme, &
     time_order, &
     qcon_modified, &
-    split_scheme, &
-    use_zonal_tend_filter, &
-    zonal_tend_filter_cutoff_wavenumber
+    split_scheme
 
 contains
 

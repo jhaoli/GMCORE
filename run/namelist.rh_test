@@ -10,13 +10,12 @@ time_step_size = 10
 history_periods = '1 days'
 restart_period = '10 days'
 pv_scheme = 2 ! 1-'midpoint', 2-'upwind with beta'
+tangent_wgt_scheme = 'classic' ! 'classic' or 'thuburn09'
 conserve_scheme= 1 ! 1-'enenrgy conserving', 2-'potential enstrophy conserving'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta'
 qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 subcycles = 8
-use_zonal_tend_filter = .false.
-zonal_tend_filter_cutoff_wavenumber = 4, 4, 4, 4, 4
 /
 
 &rossby_haurwitz_wave_test_params
