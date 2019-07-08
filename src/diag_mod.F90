@@ -65,7 +65,6 @@ contains
         diag%total_mass = diag%total_mass + state%gd(i,j) * mesh%cell_area(j) 
       end do
     end do
-    diag%total_mass = diag%total_mass * radius**2
 
     if (ieee_is_nan(diag%total_mass)) then
       call log_error('Total mass is NaN!')

@@ -138,7 +138,7 @@ contains
     if (time_is_alerted('hist0.output')) call history_write(state, static, diag)
  
 !     if (time_is_alerted('restart.output')) call restart_write(state, static)
-!     if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
+    if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
   end subroutine output
 
   subroutine space_operators(state, tend, pass)
