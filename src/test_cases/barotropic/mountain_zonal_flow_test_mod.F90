@@ -76,7 +76,7 @@ contains
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        sin_lon = mesh%half_cos_lon(i)
+        sin_lon = mesh%half_sin_lon(i)
         state(1)%v(i,j) = - u0 * sin_lon * sin_alpha
       end do
     end do
