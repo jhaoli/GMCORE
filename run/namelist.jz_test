@@ -1,18 +1,17 @@
 &dycore_params
 test_case = 'jet_zonal_flow'
-case_name = 'jz_test.360x180.pc.dt05'
+case_name = 'jz_test.180x90.dt10'
 case_desc = 'Jet zonal flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
 run_days = 6
-num_lon = 360
-num_lat = 180
-time_step_size = 3
+num_lon = 180
+num_lat = 90
+time_step_size = 10
 history_periods = '1 hours'
 restart_period = '6 hours'
-pv_scheme = 1 ! 1-'midpoint', 2-'upwind with beta'
+pv_scheme = 3 ! 1-'midpoint', 2-'upwind with beta', 3-'APVM'
 conserve_scheme= 1 ! 1-'enenrgy conserving', 2-'potential enstrophy conserving'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta'
-qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 subcycles = 6
 /
