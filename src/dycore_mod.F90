@@ -97,7 +97,7 @@ contains
   subroutine dycore_run()
 
     call diag_run(state(old))
-    call calc_total_potential_enstrophy(state(old),tend(old))
+    call calc_total_vorticity_enstrophy(state(old),tend(old))
     call history_write(state(old), static, diag)
     call log_add_diag('total_mass', diag%total_mass)
     call log_add_diag('total_energy', diag%total_energy)
@@ -110,7 +110,7 @@ contains
       call time_integrate()
       call time_advance()
       call diag_run(state(old))
-      call calc_total_potential_enstrophy(state(old),tend(old))
+      call calc_total_vorticity_enstrophy(state(old),tend(old))
       call output(state(old))
       call log_add_diag('total_mass', diag%total_mass)
       call log_add_diag('total_energy', diag%total_energy)
@@ -576,7 +576,7 @@ contains
             ut = tend%diag%mass_flux_lon_t(i,j) / tend%diag%gd_lat(i,j) / g 
             vn = state%v(i,j)
             tend%diag%pv_lat(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i-1,j)) - &
-                                    0.5 * (ut * tend%diag%dpv_lon_t(i,j) / le + vn * tend%diag%dpv_lat_n(i,j) / de) * time_step_size
+                                    mesh%half_upwind_beta(j) * 0.5 * (ut * tend%diag%dpv_lon_t(i,j) / le + vn * tend%diag%dpv_lat_n(i,j) / de) * time_step_size
           end if
         end do  
     end do 
@@ -588,7 +588,7 @@ contains
         un = state%u(i,j)
         vt = tend%diag%mass_flux_lat_t(i,j) / tend%diag%gd_lon(i,j) / g
         tend%diag%pv_lon(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j+1)) - &
-                                0.5 * (un * tend%diag%dpv_lon_n(i,j) / de + vt * tend%diag%dpv_lat_t(i,j) / le) * time_step_size
+                                mesh%full_upwind_beta(j) * 0.5 * (un * tend%diag%dpv_lon_n(i,j) / de + vt * tend%diag%dpv_lat_t(i,j) / le) * time_step_size
       end do 
     end do 
     call parallel_fill_halo(tend%diag%pv_lat, all_halo = .true.)
@@ -596,7 +596,7 @@ contains
   end subroutine calc_pv_on_edge_apvm
   
 
-  subroutine calc_total_potential_enstrophy(state, tend)
+  subroutine calc_total_vorticity_enstrophy(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer i, j 
@@ -605,45 +605,19 @@ contains
     call calc_pv_on_vertex(state, tend)
     
     diag%total_enstrophy = 0.0
-    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         diag%total_enstrophy = diag%total_enstrophy + 0.5 * (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do 
     end do 
-    if (parallel%has_south_pole) then
-      j = parallel%half_lat_south_pole_idx
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j) 
-      end do                              
-    end if
-    
-    if (parallel%has_north_pole) then
-      j = parallel%half_lat_north_pole_idx 
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        diag%total_enstrophy = diag%total_enstrophy + 0.5 * (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j) 
-      end do
-    end if
 
     diag%total_absolute_vorticity = 0.0
-    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         diag%total_absolute_vorticity = diag%total_absolute_vorticity + (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j) * mesh%vertex_area(j)
       end do 
     end do 
-    if (parallel%has_south_pole) then
-      j = parallel%half_lat_south_pole_idx
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        diag%total_absolute_vorticity = diag%total_absolute_vorticity + (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j) * mesh%vertex_area(j) 
-      end do                              
-    end if
-    
-    if (parallel%has_north_pole) then
-      j = parallel%half_lat_north_pole_idx 
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        diag%total_absolute_vorticity = diag%total_absolute_vorticity + (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j) * mesh%vertex_area(j) 
-      end do
-    end if
-  end subroutine calc_total_potential_enstrophy
+  end subroutine calc_total_vorticity_enstrophy
 
   subroutine energy_gradient_operator(state, tend)
     type(state_type), intent(in) :: state
