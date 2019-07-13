@@ -22,8 +22,8 @@ module diag_mod
   type diag_type
     real total_mass
     real total_energy
-    real total_enstrophy
-    real total_potential_vorticity
+    real total_potential_enstrophy
+    real total_absolute_vorticity
     real, allocatable :: vor(:,:)
     real, allocatable :: div(:,:)
     real, allocatable :: pv(:,:)
@@ -76,12 +76,12 @@ contains
       call log_error('Total energy is NaN!')
     end if
 
-    if (ieee_is_nan(diag%total_enstrophy)) then
+    if (ieee_is_nan(diag%total_potential_enstrophy)) then
       call log_error('Total potential enstrophy is NaN!')
     end if
 
-    if (ieee_is_nan(diag%total_potential_vorticity)) then
-      call log_error('Total potential vorticity is NaN!')
+    if (ieee_is_nan(diag%total_absolute_vorticity)) then
+      call log_error('Total absolute vorticity is NaN!')
     end if   
   end subroutine diag_run
 

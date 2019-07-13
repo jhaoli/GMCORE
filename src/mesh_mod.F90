@@ -54,6 +54,9 @@ module mesh_mod
     ! weights for reconstructing tangent wind
     real, allocatable :: full_tangent_wgt(:,:)
     real, allocatable :: half_tangent_wgt(:,:)
+    ! weights for dissipating potential enstrophy
+    real, allocatable :: full_upwind_beta(:)
+    real, allocatable :: half_upwind_beta(:)
   end type mesh_type
 
   type(mesh_type) mesh
@@ -101,6 +104,8 @@ contains
     allocate(mesh%vertex_lat_distance(mesh%num_full_lat))
     allocate(mesh%full_tangent_wgt(2,mesh%num_full_lat))
     allocate(mesh%half_tangent_wgt(2,mesh%num_half_lat))
+    allocate(mesh%full_upwind_beta(mesh%num_full_lat))
+    allocate(mesh%half_upwind_beta(mesh%num_half_lat))
 
     mesh%dlon = 2 * pi / mesh%num_full_lon
     do i = 1, mesh%num_full_lon
@@ -263,7 +268,15 @@ contains
         mesh%half_tangent_wgt(1,j) = mesh%subcell_area(1,j) / mesh%cell_area(j)
         mesh%half_tangent_wgt(2,j) = mesh%subcell_area(2,j+1) / mesh%cell_area(j+1)
       end do 
-    end select   
+    end select  
+
+    do j = 1, mesh%num_full_lat
+      mesh%full_upwind_beta(j) = 4 / pi**2 * mesh%full_lat(j)**2 
+    end do
+    do j = 1, mesh%num_half_lat
+      mesh%half_upwind_beta(j) = 4 / pi**2 * mesh%half_lat(j)**2 
+    end do
+
     call log_notice('Mesh module is initialized.') 
   end subroutine mesh_init
 
@@ -296,6 +309,8 @@ contains
     if (allocated(mesh%vertex_lat_distance)) deallocate(mesh%vertex_lat_distance)
     if (allocated(mesh%full_tangent_wgt)) deallocate(mesh%full_tangent_wgt)
     if (allocated(mesh%half_tangent_wgt)) deallocate(mesh%half_tangent_wgt)
+    if (allocated(mesh%full_upwind_beta)) deallocate(mesh%full_upwind_beta)
+    if (allocated(mesh%half_upwind_beta)) deallocate(mesh%half_upwind_beta)
 
     call log_notice('Mesh module is finalized.')
 

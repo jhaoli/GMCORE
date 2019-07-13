@@ -50,14 +50,12 @@ module types_mod
     real, allocatable :: normal_lat_flux(:,:)
     real, allocatable :: mass_flux_lon_t(:,:)
     real, allocatable :: mass_flux_lat_t(:,:) 
-    real, allocatable :: pv_lon(:,:), pv_lat(:,:)
-    !
-    real, allocatable :: tangent_wind_lon(:,:)
-    real, allocatable :: tangent_wind_lat(:,:)
-    real, allocatable :: gradient_pv_lon(:,:)
-    real, allocatable :: gradient_pv_lat(:,:)
-    real, allocatable :: tangent_gradient_pv_lon(:,:)
-    real, allocatable :: tangent_gradient_pv_lat(:,:)
+    real, allocatable :: pv_lon(:,:)
+    real, allocatable :: pv_lat(:,:)
+    real, allocatable :: dpv_lon_t(:,:)
+    real, allocatable :: dpv_lat_t(:,:)
+    real, allocatable :: dpv_lon_n(:,:)
+    real, allocatable :: dpv_lat_n(:,:)
   end type dia_type
 
   type tend_type
@@ -150,12 +148,11 @@ contains
     if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.)
     if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.) 
   !!
-    if (.not. allocated(tend%diag%tangent_wind_lon)) call parallel_allocate(tend%diag%tangent_wind_lon, half_lon=.true.)
-    if (.not. allocated(tend%diag%tangent_wind_lat)) call parallel_allocate(tend%diag%tangent_wind_lat, half_lat=.true.)
-    if (.not. allocated(tend%diag%gradient_pv_lon)) call parallel_allocate(tend%diag%gradient_pv_lon, half_lon=.true.)
-    if (.not. allocated(tend%diag%gradient_pv_lat)) call parallel_allocate(tend%diag%gradient_pv_lat, half_lat=.true.)
-    if (.not. allocated(tend%diag%tangent_gradient_pv_lon)) call parallel_allocate(tend%diag%tangent_gradient_pv_lon, half_lon=.true.)
-    if (.not. allocated(tend%diag%tangent_gradient_pv_lat)) call parallel_allocate(tend%diag%tangent_gradient_pv_lat, half_lat=.true.)
+    if (.not. allocated(tend%diag%dpv_lon_t)) call parallel_allocate(tend%diag%dpv_lon_t, half_lat=.true.)
+    if (.not. allocated(tend%diag%dpv_lat_t)) call parallel_allocate(tend%diag%dpv_lat_t, half_lon=.true.)
+    if (.not. allocated(tend%diag%dpv_lon_n)) call parallel_allocate(tend%diag%dpv_lon_n, half_lon=.true.)
+    if (.not. allocated(tend%diag%dpv_lat_n)) call parallel_allocate(tend%diag%dpv_lat_n, half_lat=.true.)
+
   end subroutine allocate_tend_data
 
   subroutine deallocate_coef_data(coef)
@@ -217,13 +214,10 @@ contains
     if (allocated(tend%diag%mass_flux_lat_t))  deallocate(tend%diag%mass_flux_lat_t)
     if (allocated(tend%diag%pv_lon))  deallocate(tend%diag%pv_lon)
     if (allocated(tend%diag%pv_lat))  deallocate(tend%diag%pv_lat)
-    !!
-    if (allocated(tend%diag%tangent_wind_lon)) deallocate(tend%diag%tangent_wind_lon)
-    if (allocated(tend%diag%tangent_wind_lat)) deallocate(tend%diag%tangent_wind_lat)
-    if (allocated(tend%diag%gradient_pv_lon)) deallocate(tend%diag%gradient_pv_lon)
-    if (allocated(tend%diag%gradient_pv_lat)) deallocate(tend%diag%gradient_pv_lat)
-    if (allocated(tend%diag%tangent_gradient_pv_lon)) deallocate(tend%diag%tangent_gradient_pv_lon)
-    if (allocated(tend%diag%tangent_gradient_pv_lat)) deallocate(tend%diag%tangent_gradient_pv_lat)
+    if (allocated(tend%diag%dpv_lon_t)) deallocate(tend%diag%dpv_lon_t)
+    if (allocated(tend%diag%dpv_lat_t)) deallocate(tend%diag%dpv_lat_t)
+    if (allocated(tend%diag%dpv_lon_n)) deallocate(tend%diag%dpv_lon_n)
+    if (allocated(tend%diag%dpv_lat_n)) deallocate(tend%diag%dpv_lat_n)
     end subroutine deallocate_tend_data
 
 

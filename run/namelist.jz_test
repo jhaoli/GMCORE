@@ -1,15 +1,15 @@
 &dycore_params
 test_case = 'jet_zonal_flow'
-case_name = 'jz_test.720x361.pc.dt1'
+case_name = 'jz_test.360x181.pc.dt2'
 case_desc = 'Jet zonal flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
-run_days = 6
-num_lon = 720
-num_lat = 361
-time_step_size = 1
+run_days = 4
+num_lon = 360
+num_lat = 181
+time_step_size = 2
 history_periods = '6 hours'
 restart_period = '100 hours'
-pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind', 3-'APVM', 4-'2D upwind'
+pv_scheme = 4 ! 1-'midpoint', 2-'1D upwind', 3-'APVM', 4-'2D upwind'
 pv_pole_scheme = .true.
 tangent_wgt_scheme = 'classic' ! 'classic' or 'thuburn09'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta'
