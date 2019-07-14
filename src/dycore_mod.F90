@@ -274,8 +274,8 @@ contains
     integer :: i, j 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%diag%gd_lon(i,j) = (mesh%lon_edge_left_area(j) * state%gd(i,j) + &
-                                   mesh%lon_edge_right_area(j) * state%gd(i+1,j)) / mesh%lon_edge_area(j) 
+        tend%diag%gd_lon(i,j) = (mesh%lon_edge_left_area(j) * state%gd(i,j) + &
+                                 mesh%lon_edge_right_area(j) * state%gd(i+1,j)) / mesh%lon_edge_area(j) 
       end do
     end do 
 
@@ -350,7 +350,7 @@ contains
         tend%diag%kinetic_energy(i,j) = 1.0 / mesh%cell_area(j) * (mesh%lon_edge_right_area(j) * state%u(i-1,j)**2 +&
                                                                    mesh%lon_edge_left_area(j) * state%u(i,j)**2 +&
                                                                    mesh%lat_edge_down_area(j) * state%v(i,j)**2 +&
-                                                                   mesh%lat_edge_up_area(j-1) * state%v(i,j-1)**2)       
+                                                                   mesh%lat_edge_up_area(j-1) * state%v(i,j-1)**2)      
       end do 
     end do
     
@@ -529,6 +529,7 @@ contains
   end subroutine calc_pv_on_edge_upwind1D
   
   subroutine calc_pv_on_edge_upwind2D(state, tend) 
+
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer :: i, j
@@ -559,6 +560,7 @@ contains
   end subroutine calc_pv_on_edge_upwind2D
 
   subroutine calc_dpv_on_edge(state, tend)
+
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer :: i, j
@@ -681,12 +683,14 @@ contains
     end if 
 
     diag%total_potential_enstrophy = 0.0
+
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         diag%total_potential_enstrophy = diag%total_potential_enstrophy + 0.5 * (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do 
     end do 
     
+
     diag%total_absolute_vorticity = 0.0
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
@@ -874,7 +878,7 @@ contains
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         ip_egf = ip_egf + tend%v_pgf(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j)   
-        ip_fu = ip_fu + tend%v_nonlinear(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j)  
+        ip_fu = ip_fu + tend%v_nonlinear(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j) 
       end do 
     end do 
 
