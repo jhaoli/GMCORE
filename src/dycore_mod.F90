@@ -160,14 +160,7 @@ contains
 
     select case (pass)
     case (all_pass)
-      if (conserve_scheme == 1) then
-        call nonlinear_coriolis_operator_energy_conserve(state, tend)
-      else if (conserve_scheme == 2) then
-        call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
-      else
-        call log_error('Unknown conserve_scheme')
-      end if 
-
+      call nonlinear_coriolis_operator(state, tend)
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
 
@@ -194,13 +187,7 @@ contains
       tend%v_pgf = 0.0
       tend%mass_div = 0.0
 #endif 
-      if (conserve_scheme == 1) then
-        call nonlinear_coriolis_operator_energy_conserve(state, tend)
-      else if (conserve_scheme == 2) then
-        call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
-      else
-        call log_error('Unknown conserve_scheme')
-      end if
+      call nonlinear_coriolis_operator(state, tend)
 
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
@@ -315,8 +302,7 @@ contains
       sp = sp / mesh%num_half_lon / mesh%vertex_area(j)
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         diag%vor(i,j) =  sp
-      end do
-      
+      end do   
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         tend%diag%pot_vor(i,j) =  (sp + coef%half_f(j)) / (tend%diag%gd_corner(i,j) / g) 
         diag%pv(i,j) = tend%diag%pot_vor(i,j)
@@ -348,9 +334,9 @@ contains
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         tend%diag%kinetic_energy(i,j) = 1.0 / mesh%cell_area(j) * (mesh%lon_edge_right_area(j) * state%u(i-1,j)**2 +&
-                                                                   mesh%lon_edge_left_area(j) * state%u(i,j)**2 +&
-                                                                   mesh%lat_edge_down_area(j) * state%v(i,j)**2 +&
-                                                                   mesh%lat_edge_up_area(j-1) * state%v(i,j-1)**2)      
+                                                                   mesh%lon_edge_left_area(j)  * state%u(i,j  )**2 +&
+                                                                   mesh%lat_edge_down_area(j)  * state%v(i,j  )**2 +&
+                                                                   mesh%lat_edge_up_area(j-1)  * state%v(i,j-1)**2)      
       end do 
     end do
     
@@ -360,8 +346,9 @@ contains
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         sp = sp + state%v(i,j)**2 
       end do
+      sp = sp / mesh%num_full_lon
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%kinetic_energy(i,j) = sp / mesh%num_full_lon 
+        tend%diag%kinetic_energy(i,j) = sp 
       end do
     end if 
     
@@ -371,8 +358,9 @@ contains
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
         np = np + state%v(i,j-1)**2 
       end do
+      np = np / mesh%num_full_lon
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%kinetic_energy(i,j) = np / mesh%num_full_lon
+        tend%diag%kinetic_energy(i,j) = np
       end do
     end if
 !!!!!!!!!!!!!!!!!!!
@@ -414,7 +402,7 @@ contains
     call parallel_fill_halo(tend%diag%mass_flux_lon_t, all_halo=.true.)
   end subroutine calc_tangent_mass_flux
 
-  subroutine nonlinear_coriolis_operator_energy_conserve(state, tend)
+  subroutine nonlinear_coriolis_operator(state, tend)
 
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
@@ -455,30 +443,7 @@ contains
       end do 
     end do  
 
-  end subroutine nonlinear_coriolis_operator_energy_conserve
-
-
-  subroutine nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-    integer :: i, j
- 
-    call calc_pv_on_edge_midpoint(state, tend)
-
-    do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%u_nonlinear(i,j) = tend%diag%mass_flux_lon_t(i,j) * tend%diag%pv_lon(i,j)
-      end do
-    end do      
-
-    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_nonlinear(i,j) = -tend%diag%mass_flux_lat_t(i,j) * tend%diag%pv_lat(i,j)
-      end do 
-    end do  
-  end subroutine nonlinear_coriolis_operator_enstrophy_conserve
-
+  end subroutine nonlinear_coriolis_operator
 
   subroutine calc_pv_on_edge_midpoint(state, tend)
     type(state_type), intent(in) :: state
@@ -683,14 +648,12 @@ contains
     end if 
 
     diag%total_potential_enstrophy = 0.0
-
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
         diag%total_potential_enstrophy = diag%total_potential_enstrophy + 0.5 * (tend%diag%gd_corner(i,j) / g) * tend%diag%pot_vor(i,j)**2 * mesh%vertex_area(j)
       end do 
     end do 
     
-
     diag%total_absolute_vorticity = 0.0
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
