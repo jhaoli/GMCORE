@@ -271,10 +271,10 @@ contains
     end select  
 
     do j = 1, mesh%num_full_lat
-      mesh%full_upwind_beta(j) = 4 / pi**2 * mesh%full_lat(j)**2 
+      mesh%full_upwind_beta(j) = 4 / pi**2 * 0.8 * mesh%full_lat(j)**2 + 0.2
     end do
     do j = 1, mesh%num_half_lat
-      mesh%half_upwind_beta(j) = 4 / pi**2 * mesh%half_lat(j)**2 
+      mesh%half_upwind_beta(j) = 4 / pi**2 * 0.8 * mesh%half_lat(j)**2 + 0.2
     end do
 
     call log_notice('Mesh module is initialized.') 
