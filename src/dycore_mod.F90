@@ -156,13 +156,8 @@ contains
 
     select case (pass)
     case (all_pass)
-      if (conserve_scheme == 1) then
-        call nonlinear_coriolis_operator(state, tend)
-      else if (conserve_scheme == 2) then
-        call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
-      else
-        call log_error('Unknown conserve scheme.')
-      end if 
+      
+      call nonlinear_coriolis_operator(state, tend)
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
 
@@ -189,13 +184,8 @@ contains
       tend%v_pgf = 0.0
       tend%mass_div = 0.0
 #endif
-      if (conserve_scheme == 1) then
-        call nonlinear_coriolis_operator(state, tend)
-      else if (conserve_scheme == 2) then
-        call nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
-      else
-        call log_error('Unknown conserve scheme.')
-      end if 
+      
+      call nonlinear_coriolis_operator(state, tend)
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
           tend%du(i,j) = tend%u_nonlinear(i,j) 
@@ -451,29 +441,6 @@ contains
     end do  
  
   end subroutine nonlinear_coriolis_operator
-
-   subroutine nonlinear_coriolis_operator_enstrophy_conserve(state, tend)
-
-    type(state_type), intent(in) :: state
-    type(tend_type), intent(inout) :: tend
-    integer :: i, j
-    real :: r1, r2
-   
-      call calc_pv_on_edge_midpoint(state, tend)
-
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%u_nonlinear(i,j) = tend%diag%mass_flux_lat_t(i,j) * tend%diag%pv_lon(i,j)
-      end do
-    end do      
-
-    do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_nonlinear(i,j) = -tend%diag%mass_flux_lon_t(i,j) * tend%diag%pv_lat(i,j)
-      end do 
-    end do  
- 
-  end subroutine nonlinear_coriolis_operator_enstrophy_conserve
   
   subroutine calc_pv_on_edge_midpoint(state, tend)
     type(state_type), intent(in) :: state
