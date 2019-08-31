@@ -81,7 +81,9 @@ contains
       end do
     end do
     call parallel_fill_halo(state(1)%gd, all_halo=.true.)
-
+    print*,'R-H wave max_u=',maxval(state(1)%u),' max_v = ', maxval(state(1)%v),' max_h = ', maxval(state(1)%gd)
+    print*,'R-H wave min_u=',minval(state(1)%u),' min_v = ', minval(state(1)%v),' min_h = ', minval(state(1)%gd)
+   stop    
   end subroutine rossby_haurwitz_wave_test_set_initial_condition
 
 end module rossby_haurwitz_wave_test_mod

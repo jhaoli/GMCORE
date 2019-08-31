@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 project(gmcore-dycore LANGUAGES Fortran)
 
-find_package(MPI)
+#find_package(MPI)
 if (NOT MPI_Fortran_FOUND)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DNO_MPI")
 else ()
@@ -64,6 +64,7 @@ set(source_files
   src/test_cases/barotropic/mountain_zonal_flow_test_mod.F90
   src/test_cases/barotropic/jet_zonal_flow_test_mod.F90
   src/test_cases/barotropic/shallow_water_waves_test_mod.F90
+  src/test_cases/barotropic/cross_polar_flow_test_mod.F90
   lib/quadpack.f90
 )
 
