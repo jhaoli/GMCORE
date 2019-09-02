@@ -1,5 +1,0 @@
-# The fortran modules provided by this target.
-provides
- datetime.mod
- datetime_mod.mod
- timedelta_mod.mod
