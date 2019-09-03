@@ -10,6 +10,7 @@ program dycore_test
   use jet_zonal_flow_test_mod
   use shallow_water_waves_test_mod
   use cross_polar_flow_test_mod
+  use held_suarez_test_mod
 
   character(256) namelist_file_path
 
@@ -40,6 +41,8 @@ program dycore_test
       call shallow_water_waves_test_set_initial_condition()
     case ('cross_polar_flow')
       call cross_polar_flow_test_set_initial_condition()
+    case ('held_suarez')
+      call held_suarez_test_set_initial_condition()
     case default
       write(6, *) '[Error]: Unknown test case ' // trim(test_case) // '!'
     end select

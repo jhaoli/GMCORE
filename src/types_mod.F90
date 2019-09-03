@@ -57,7 +57,12 @@ module types_mod
     real, allocatable :: dpv_lon_n(:,:)
     real, allocatable :: dpv_lat_n(:,:)
   end type dia_type
-
+  type force_type
+  real, allocatable :: u(:,:)
+  real, allocatable :: v(:,:)
+  real, allocatable :: gd(:,:)
+  end type force_type
+  
   type tend_type
     real, allocatable :: u_nonlinear(:,:)
     real, allocatable :: v_nonlinear(:,:)
@@ -70,6 +75,7 @@ module types_mod
     real, allocatable :: dv(:,:)
     real, allocatable :: dgd(:,:)
     type(dia_type) diag
+    type(force_type) force
   end type tend_type
 
   interface allocate_data
@@ -153,6 +159,10 @@ contains
     if (.not. allocated(tend%diag%dpv_lon_n)) call parallel_allocate(tend%diag%dpv_lon_n, half_lon=.true.)
     if (.not. allocated(tend%diag%dpv_lat_n)) call parallel_allocate(tend%diag%dpv_lat_n, half_lat=.true.)
 
+    if (.not. allocated(tend%force%u))  call parallel_allocate(tend%force%u, half_lon=.true.)
+    if (.not. allocated(tend%force%v))  call parallel_allocate(tend%force%v, half_lat=.true.)
+    if (.not. allocated(tend%force%gd)) call parallel_allocate(tend%force%gd)
+
   end subroutine allocate_tend_data
 
   subroutine deallocate_coef_data(coef)
@@ -218,6 +228,10 @@ contains
     if (allocated(tend%diag%dpv_lat_t)) deallocate(tend%diag%dpv_lat_t)
     if (allocated(tend%diag%dpv_lon_n)) deallocate(tend%diag%dpv_lon_n)
     if (allocated(tend%diag%dpv_lat_n)) deallocate(tend%diag%dpv_lat_n)
+
+    if (allocated(tend%force%u))  deallocate(tend%force%u)
+    if (allocated(tend%force%v))  deallocate(tend%force%v)
+    if (allocated(tend%force%gd)) deallocate(tend%force%gd)
     end subroutine deallocate_tend_data
 
 

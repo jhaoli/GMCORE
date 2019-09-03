@@ -11,6 +11,7 @@ module dycore_mod
   use diag_mod
   use history_mod
   use restart_mod
+  use forcing_mod
 
   implicit none
 
@@ -163,22 +164,23 @@ contains
       call nonlinear_coriolis_operator(state, tend)
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
-
+      
+      call force_run(state, tend)
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) 
+          tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
         end do
       end do
       
       do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-          tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j)
+          tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j) + tend%force%v(i,j)
         end do
       end do
 
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx  
-          tend%dgd(i,j) = tend%mass_div(i,j) 
+          tend%dgd(i,j) = tend%mass_div(i,j) + tend%force%gd(i,j)
         end do
       end do
     case (slow_pass)
