@@ -57,6 +57,7 @@ set(source_files
   src/history_mod.F90
   src/restart_mod.F90
   src/data_mod.F90
+  src/forcing_mod.F90
   src/dycore_mod.F90
   src/dycore_test.F90
   src/test_cases/barotropic/rossby_haurwitz_wave_test_mod.F90
@@ -65,6 +66,7 @@ set(source_files
   src/test_cases/barotropic/jet_zonal_flow_test_mod.F90
   src/test_cases/barotropic/shallow_water_waves_test_mod.F90
   src/test_cases/barotropic/cross_polar_flow_test_mod.F90
+  src/test_cases/barotropic/held_suarez_test_mod.F90
   lib/quadpack.f90
 )
 

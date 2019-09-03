@@ -11,6 +11,7 @@ module dycore_mod
   use diag_mod
   use history_mod
   use restart_mod
+  use forcing_mod
 
   implicit none
 
@@ -160,22 +161,26 @@ contains
       call nonlinear_coriolis_operator(state, tend)
       call energy_gradient_operator(state, tend)
       call mass_divergence_operator(state, tend)
+      call force_run(state, tend)
 
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) 
+          tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
         end do
       end do
-
-      do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
-        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-          tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j)
-        end do
-      end do 
+      if (test_case == "held_suarez") then
+        tend%dv(:,:) = 0.0  
+      else
+        do j = parallel%half_lat_start_idx_no_pole, parallel%half_lat_end_idx_no_pole
+          do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+            tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j) + tend%force%v(i,j)
+          end do
+        end do  
+      end if 
 
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-          tend%dgd(i,j) = tend%mass_div(i,j)
+          tend%dgd(i,j) = tend%mass_div(i,j) + tend%force%gd(i,j)
         end do
       end do
     case (slow_pass)
@@ -411,9 +416,11 @@ contains
     case (1)  
       call calc_pv_on_edge_midpoint(state, tend)
     case (2) 
-      call calc_pv_on_edge_upwind(state, tend)
+      call calc_pv_on_edge_upwind1D(state, tend)
     case (3)
       call calc_pv_on_edge_apvm(state, tend)
+    case (4)
+      call calc_pv_on_edge_upwind2D(state, tend)
     case default
       call log_error('Unknown PV scheme.')
     end select
@@ -462,7 +469,7 @@ contains
     call parallel_fill_halo(tend%diag%pv_lon, all_halo = .true.)
   end subroutine calc_pv_on_edge_midpoint
 
-  subroutine calc_pv_on_edge_upwind(state, tend)
+  subroutine calc_pv_on_edge_upwind1D(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
     integer :: i, j  
@@ -485,8 +492,33 @@ contains
 
     call parallel_fill_halo(tend%diag%pv_lat, all_halo = .true.)
     call parallel_fill_halo(tend%diag%pv_lon, all_halo = .true.)
-  end subroutine calc_pv_on_edge_upwind
-  
+  end subroutine calc_pv_on_edge_upwind1D
+
+  subroutine calc_pv_on_edge_upwind2D(state, tend)
+    type(state_type), intent(in) :: state
+    type(tend_type) , intent(inout) :: tend
+    integer :: i, j
+
+    call calc_dpv_on_edge(state, tend)
+
+    do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+        tend%diag%pv_lat(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i-1,j)) - &
+                                mesh%half_upwind_beta(j) * 0.5 * (sign(1.0, tend%diag%mass_flux_lon_t(i,j)) * tend%diag%dpv_lon_t(i,j) +&
+                                                                  sign(1.0, state%v(i,j)) * tend%diag%dpv_lat_n(i,j))
+      end do 
+    end do 
+    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+        tend%diag%pv_lon(i,j) = 0.5 * (tend%diag%pot_vor(i,j) + tend%diag%pot_vor(i,j-1)) - &
+                                mesh%full_upwind_beta(j) * 0.5 * (sign(1.0, state%u(i,j)) * tend%diag%dpv_lon_n(i,j) + &
+                                                                  sign(1.0, tend%diag%mass_flux_lat_t(i,j)) * tend%diag%dpv_lat_t(i,j))
+      end do 
+    end do 
+    call parallel_fill_halo(tend%diag%pv_lon, all_halo = .true.)
+    call parallel_fill_halo(tend%diag%pv_lat, all_halo = .true.)
+  end subroutine calc_pv_on_edge_upwind2D
+
   subroutine calc_dpv_on_edge(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
