@@ -171,12 +171,15 @@ contains
           tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
         end do
       end do
-      
-      do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
-        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-          tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j) + tend%force%v(i,j)
+      if (test_case == "held_suarez") then
+        tend%dv(:,:) = 0.0
+      else
+        do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
+          do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+            tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j) + tend%force%v(i,j)
+          end do
         end do
-      end do
+      end if 
 
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx  

@@ -1,0 +1,19 @@
+&dycore_params
+test_case = 'held_suarez'
+case_name = 'held_suarez_c_u_01.180x91.dt1200'
+case_desc = 'Held-Suarez test'
+author = 'jianghaolee@126.com'
+run_days = 2400
+num_lon = 180
+num_lat = 91
+time_step_size = 1200
+history_periods = '1 days'
+restart_period = '10 days'
+pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind with beta'
+pv_pole_scheme = .true.
+tangent_wgt_scheme = 'classic' ! 'classic' or 'thuburn09'
+time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta2'
+qcon_modified = .false.
+split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
+subcycles = 8
+/
