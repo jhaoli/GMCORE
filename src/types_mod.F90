@@ -19,8 +19,8 @@ module types_mod
     real, allocatable :: full_f(:)
     real, allocatable :: half_f(:)
     ! Curvature coefficient at full/half meridional grids 
-    real, allocatable :: full_c(:)
-    real, allocatable :: half_c(:)
+    ! real, allocatable :: full_c(:)
+    ! real, allocatable :: half_c(:)
     ! Zonal difference coefficient at full/half meridional grids
     real, allocatable :: full_dlon(:)
     real, allocatable :: half_dlon(:)
@@ -42,7 +42,7 @@ module types_mod
   type dia_type
     real, allocatable :: gd_corner(:,:)
     real, allocatable :: pot_vor(:,:)
-    real, allocatable :: kinetic_energy(:,:)
+    real, allocatable :: kinetic(:,:)
     real, allocatable :: energy(:,:)
     real, allocatable :: gd_lon(:,:)
     real, allocatable :: gd_lat(:,:)
@@ -57,6 +57,7 @@ module types_mod
     real, allocatable :: dpv_lon_n(:,:)
     real, allocatable :: dpv_lat_n(:,:)
   end type dia_type
+
   type force_type
   real, allocatable :: u(:,:)
   real, allocatable :: v(:,:)
@@ -69,8 +70,6 @@ module types_mod
     real, allocatable :: u_pgf(:,:)
     real, allocatable :: v_pgf(:,:)
     real, allocatable :: mass_div(:,:)
-    real, allocatable :: mass_div_lon(:,:)
-    real, allocatable :: mass_div_lat(:,:)
     real, allocatable :: du(:,:)
     real, allocatable :: dv(:,:)
     real, allocatable :: dgd(:,:)
@@ -100,8 +99,8 @@ contains
 
     allocate(coef%full_f(mesh%num_full_lat))
     allocate(coef%half_f(mesh%num_half_lat))
-    allocate(coef%full_c(mesh%num_full_lat))
-    allocate(coef%half_c(mesh%num_half_lat))
+    ! allocate(coef%full_c(mesh%num_full_lat))
+    ! allocate(coef%half_c(mesh%num_half_lat))
     allocate(coef%full_dlon(mesh%num_full_lat))
     allocate(coef%half_dlon(mesh%num_half_lat))
     allocate(coef%full_dlat(mesh%num_full_lat))
@@ -113,7 +112,7 @@ contains
 
     type(static_type), intent(out) :: static
 
-    if (.not. allocated(static%ghs))        call parallel_allocate(static%ghs)
+    if (.not. allocated(static%ghs))        call parallel_allocate(static%ghs, extended_halo=.true.)
 
   end subroutine allocate_static_data
 
@@ -121,9 +120,9 @@ contains
 
     type(state_type), intent(out) :: state
 
-    if (.not. allocated(state%u))           call parallel_allocate(state%u,             half_lon=.true.)
-    if (.not. allocated(state%v))           call parallel_allocate(state%v,             half_lat=.true.)
-    if (.not. allocated(state%gd))          call parallel_allocate(state%gd)
+    if (.not. allocated(state%u))           call parallel_allocate(state%u,             half_lon=.true., extended_halo=.true.)
+    if (.not. allocated(state%v))           call parallel_allocate(state%v,             half_lat=.true., extended_halo=.true.)
+    if (.not. allocated(state%gd))          call parallel_allocate(state%gd,                             extended_halo=.true.)
 
   end subroutine allocate_state_data
 
@@ -131,37 +130,34 @@ contains
 
     type(tend_type), intent(out) :: tend
 
-    if (.not. allocated(tend%u_nonlinear))    call parallel_allocate(tend%u_nonlinear,      half_lon=.true.)
-    if (.not. allocated(tend%u_pgf))        call parallel_allocate(tend%u_pgf,          half_lon=.true.)
-    if (.not. allocated(tend%du))           call parallel_allocate(tend%du,             half_lon=.true.)
-    if (.not. allocated(tend%v_nonlinear))    call parallel_allocate(tend%v_nonlinear,      half_lat=.true.)
-    if (.not. allocated(tend%v_pgf))        call parallel_allocate(tend%v_pgf,          half_lat=.true.)
-    if (.not. allocated(tend%dv))           call parallel_allocate(tend%dv,             half_lat=.true.)
-    if (.not. allocated(tend%mass_div))     call parallel_allocate(tend%mass_div)
-    if (.not. allocated(tend%mass_div_lon))     call parallel_allocate(tend%mass_div_lon)
-    if (.not. allocated(tend%mass_div_lat))     call parallel_allocate(tend%mass_div_lat)
-    if (.not. allocated(tend%dgd))          call parallel_allocate(tend%dgd)
-    if (.not. allocated(tend%diag%gd_corner)) call parallel_allocate(tend%diag%gd_corner, half_lon=.true., half_lat=.true.)
-    if (.not. allocated(tend%diag%gd_lon)) call parallel_allocate(tend%diag%gd_lon, half_lon=.true.)
-    if (.not. allocated(tend%diag%gd_lat)) call parallel_allocate(tend%diag%gd_lat, half_lat=.true.)
-    if (.not. allocated(tend%diag%pot_vor)) call parallel_allocate(tend%diag%pot_vor, half_lon=.true., half_lat=.true.)
-    if (.not. allocated(tend%diag%kinetic_energy))  call parallel_allocate(tend%diag%kinetic_energy)
-    if (.not. allocated(tend%diag%energy))  call parallel_allocate(tend%diag%energy)
-    if (.not. allocated(tend%diag%normal_lon_flux))  call parallel_allocate(tend%diag%normal_lon_flux, half_lon=.true.)
-    if (.not. allocated(tend%diag%normal_lat_flux))  call parallel_allocate(tend%diag%normal_lat_flux, half_lat=.true.)
-    if (.not. allocated(tend%diag%mass_flux_lon_t))  call parallel_allocate(tend%diag%mass_flux_lon_t, half_lat=.true.)
-    if (.not. allocated(tend%diag%mass_flux_lat_t))  call parallel_allocate(tend%diag%mass_flux_lat_t, half_lon=.true.)
-    if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.)
-    if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.) 
+    if (.not. allocated(tend%u_nonlinear))    call parallel_allocate(tend%u_nonlinear,                     half_lon=.true., extended_halo=.true.)
+    if (.not. allocated(tend%u_pgf))          call parallel_allocate(tend%u_pgf,                           half_lon=.true., extended_halo=.true.)
+    if (.not. allocated(tend%du))             call parallel_allocate(tend%du,                              half_lon=.true., extended_halo=.true.)
+    if (.not. allocated(tend%v_nonlinear))    call parallel_allocate(tend%v_nonlinear,                     half_lat=.true., extended_halo=.true.)
+    if (.not. allocated(tend%v_pgf))          call parallel_allocate(tend%v_pgf,                           half_lat=.true., extended_halo=.true.)
+    if (.not. allocated(tend%dv))             call parallel_allocate(tend%dv,                              half_lat=.true., extended_halo=.true.)
+    if (.not. allocated(tend%mass_div))       call parallel_allocate(tend%mass_div,                                         extended_halo=.true.)
+    if (.not. allocated(tend%dgd))            call parallel_allocate(tend%dgd,                                              extended_halo=.true.)
+    if (.not. allocated(tend%diag%gd_corner)) call parallel_allocate(tend%diag%gd_corner, half_lon=.true., half_lat=.true., extended_halo=.true.)
+    if (.not. allocated(tend%diag%gd_lon))    call parallel_allocate(tend%diag%gd_lon, half_lon=.true.,                     extended_halo=.true.)
+    if (.not. allocated(tend%diag%gd_lat))    call parallel_allocate(tend%diag%gd_lat, half_lat=.true.,                     extended_halo=.true.)
+    if (.not. allocated(tend%diag%pot_vor))   call parallel_allocate(tend%diag%pot_vor, half_lon=.true., half_lat=.true.,   extended_halo=.true.)
+    if (.not. allocated(tend%diag%kinetic))   call parallel_allocate(tend%diag%kinetic,                                     extended_halo=.true.)
+    if (.not. allocated(tend%diag%normal_lon_flux))  call parallel_allocate(tend%diag%normal_lon_flux, half_lon=.true.,     extended_halo=.true.)
+    if (.not. allocated(tend%diag%normal_lat_flux))  call parallel_allocate(tend%diag%normal_lat_flux, half_lat=.true.,     extended_halo=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lon_t))  call parallel_allocate(tend%diag%mass_flux_lon_t, half_lat=.true.,     extended_halo=.true.)
+    if (.not. allocated(tend%diag%mass_flux_lat_t))  call parallel_allocate(tend%diag%mass_flux_lat_t, half_lon=.true.,     extended_halo=.true.)
+    if (.not. allocated(tend%diag%pv_lon))    call parallel_allocate(tend%diag%pv_lon, half_lon=.true.,                     extended_halo=.true.)
+    if (.not. allocated(tend%diag%pv_lat))    call parallel_allocate(tend%diag%pv_lat, half_lat=.true.,                     extended_halo=.true.) 
   !!
-    if (.not. allocated(tend%diag%dpv_lon_t)) call parallel_allocate(tend%diag%dpv_lon_t, half_lat=.true.)
-    if (.not. allocated(tend%diag%dpv_lat_t)) call parallel_allocate(tend%diag%dpv_lat_t, half_lon=.true.)
-    if (.not. allocated(tend%diag%dpv_lon_n)) call parallel_allocate(tend%diag%dpv_lon_n, half_lon=.true.)
-    if (.not. allocated(tend%diag%dpv_lat_n)) call parallel_allocate(tend%diag%dpv_lat_n, half_lat=.true.)
+    if (.not. allocated(tend%diag%dpv_lon_t)) call parallel_allocate(tend%diag%dpv_lon_t, half_lat=.true.,                  extended_halo=.true.)
+    if (.not. allocated(tend%diag%dpv_lat_t)) call parallel_allocate(tend%diag%dpv_lat_t, half_lon=.true.,                  extended_halo=.true.)
+    if (.not. allocated(tend%diag%dpv_lon_n)) call parallel_allocate(tend%diag%dpv_lon_n, half_lon=.true.,                  extended_halo=.true.)
+    if (.not. allocated(tend%diag%dpv_lat_n)) call parallel_allocate(tend%diag%dpv_lat_n, half_lat=.true.,                  extended_halo=.true.)
 
-    if (.not. allocated(tend%force%u))  call parallel_allocate(tend%force%u, half_lon=.true.)
-    if (.not. allocated(tend%force%v))  call parallel_allocate(tend%force%v, half_lat=.true.)
-    if (.not. allocated(tend%force%gd)) call parallel_allocate(tend%force%gd)
+    if (.not. allocated(tend%force%u))        call parallel_allocate(tend%force%u, half_lon=.true.,                         extended_halo=.true.)
+    if (.not. allocated(tend%force%v))        call parallel_allocate(tend%force%v, half_lat=.true.,                         extended_halo=.true.)
+    if (.not. allocated(tend%force%gd))       call parallel_allocate(tend%force%gd,                                         extended_halo=.true.)
 
   end subroutine allocate_tend_data
 
@@ -171,8 +167,6 @@ contains
 
     if (allocated(coef%full_f))    deallocate(coef%full_f)
     if (allocated(coef%half_f))    deallocate(coef%half_f)
-    if (allocated(coef%full_c))    deallocate(coef%full_c)
-    if (allocated(coef%half_c))    deallocate(coef%half_c)
     if (allocated(coef%full_dlon)) deallocate(coef%full_dlon)
     if (allocated(coef%half_dlon)) deallocate(coef%half_dlon)
     if (allocated(coef%full_dlat)) deallocate(coef%full_dlat)
@@ -204,26 +198,23 @@ contains
 
     if (allocated(tend%u_nonlinear))    deallocate(tend%u_nonlinear)
     if (allocated(tend%v_nonlinear))    deallocate(tend%v_nonlinear)
-    if (allocated(tend%u_pgf))        deallocate(tend%u_pgf)
-    if (allocated(tend%v_pgf))        deallocate(tend%v_pgf)
-    if (allocated(tend%mass_div))     deallocate(tend%mass_div)
-    if (allocated(tend%mass_div_lon))     deallocate(tend%mass_div_lon)
-    if (allocated(tend%mass_div_lat))     deallocate(tend%mass_div_lat)
-    if (allocated(tend%du))           deallocate(tend%du)
-    if (allocated(tend%dv))           deallocate(tend%dv)
-    if (allocated(tend%dgd))          deallocate(tend%dgd)
+    if (allocated(tend%u_pgf))          deallocate(tend%u_pgf)
+    if (allocated(tend%v_pgf))          deallocate(tend%v_pgf)
+    if (allocated(tend%mass_div))       deallocate(tend%mass_div)
+    if (allocated(tend%du))             deallocate(tend%du)
+    if (allocated(tend%dv))             deallocate(tend%dv)
+    if (allocated(tend%dgd))            deallocate(tend%dgd)
     if (allocated(tend%diag%gd_corner)) deallocate(tend%diag%gd_corner)
-    if (allocated(tend%diag%gd_lon)) deallocate(tend%diag%gd_lon)
-    if (allocated(tend%diag%gd_lat)) deallocate(tend%diag%gd_lat)
-    if (allocated(tend%diag%pot_vor)) deallocate(tend%diag%pot_vor)
-    if (allocated(tend%diag%energy))  deallocate(tend%diag%energy)
-    if (allocated(tend%diag%kinetic_energy))  deallocate(tend%diag%kinetic_energy)
+    if (allocated(tend%diag%gd_lon))   deallocate(tend%diag%gd_lon)
+    if (allocated(tend%diag%gd_lat))   deallocate(tend%diag%gd_lat)
+    if (allocated(tend%diag%pot_vor))  deallocate(tend%diag%pot_vor)
+    if (allocated(tend%diag%kinetic))  deallocate(tend%diag%kinetic)
     if (allocated(tend%diag%normal_lon_flux))  deallocate(tend%diag%normal_lon_flux)
     if (allocated(tend%diag%normal_lat_flux))  deallocate(tend%diag%normal_lat_flux)
     if (allocated(tend%diag%mass_flux_lon_t))  deallocate(tend%diag%mass_flux_lon_t)
     if (allocated(tend%diag%mass_flux_lat_t))  deallocate(tend%diag%mass_flux_lat_t)
-    if (allocated(tend%diag%pv_lon))  deallocate(tend%diag%pv_lon)
-    if (allocated(tend%diag%pv_lat))  deallocate(tend%diag%pv_lat)
+    if (allocated(tend%diag%pv_lon))    deallocate(tend%diag%pv_lon)
+    if (allocated(tend%diag%pv_lat))    deallocate(tend%diag%pv_lat)
     if (allocated(tend%diag%dpv_lon_t)) deallocate(tend%diag%dpv_lon_t)
     if (allocated(tend%diag%dpv_lat_t)) deallocate(tend%diag%dpv_lat_t)
     if (allocated(tend%diag%dpv_lon_n)) deallocate(tend%diag%dpv_lon_n)

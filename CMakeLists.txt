@@ -57,6 +57,7 @@ set(source_files
   src/history_mod.F90
   src/restart_mod.F90
   src/data_mod.F90
+  src/reduce_mod.F90
   src/forcing_mod.F90
   src/dycore_mod.F90
   src/dycore_test.F90

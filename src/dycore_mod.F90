@@ -2,6 +2,7 @@ module dycore_mod
 
   use params_mod, split_scheme_in => split_scheme
   use data_mod
+  use reduce_mod
   use log_mod
   use types_mod
   use mesh_mod
@@ -69,6 +70,7 @@ contains
     call history_init()
     call restart_init()
     call data_init()
+    call reduce_init()
 
     select case (time_scheme)
     case ('predict_correct')
@@ -134,6 +136,7 @@ contains
     call diag_final()
     call history_final()
     call data_final()
+    call reduce_final()
 
     call log_notice('Dycore module is finalized.')
 
@@ -145,7 +148,7 @@ contains
     if (time_is_alerted('hist0.output')) call history_write(state, static, diag)
  
 !     if (time_is_alerted('restart.output')) call restart_write(state, static)
-!     if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
+    ! if (time_is_alerted('debug.output')) call history_write(state, tend(old), tag)
   end subroutine output
 
   subroutine space_operators(state, tend, pass)
@@ -156,8 +159,10 @@ contains
 
     call calc_normal_mass_flux(state, tend)
     call calc_pv_on_vertex(state,tend)
-    call calc_energy_on_center(state, tend)
+    call calc_kinetic_on_center(state, tend)
     call calc_tangent_mass_flux(state, tend)
+
+    call reduce_run(state, static)
 
     select case (pass)
     case (all_pass)
@@ -166,9 +171,10 @@ contains
       call mass_divergence_operator(state, tend)
       
       call force_run(state, tend)
+
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%du(i,j) = tend%u_pgf(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
+          tend%du(i,j) = -tend%u_pgf(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
         end do
       end do
       if (test_case == "held_suarez") then
@@ -176,14 +182,14 @@ contains
       else
         do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
           do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-            tend%dv(i,j) = tend%v_pgf(i,j) + tend%v_nonlinear(i,j) + tend%force%v(i,j)
+            tend%dv(i,j) = -tend%v_pgf(i,j) - tend%v_nonlinear(i,j) + tend%force%v(i,j)
           end do
         end do
       end if 
 
       do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx  
-          tend%dgd(i,j) = tend%mass_div(i,j) + tend%force%gd(i,j)
+          tend%dgd(i,j) = -tend%mass_div(i,j) + tend%force%gd(i,j)
         end do
       end do
     case (slow_pass)
@@ -233,9 +239,8 @@ contains
       end do
     end select
 
-!     call check_spaceoperator(state, tend)
+    ! call check_spaceoperator(state, tend)
   end subroutine space_operators
-
 
   subroutine calc_normal_mass_flux(state, tend)
     type(state_type), intent(in) :: state
@@ -278,7 +283,6 @@ contains
       end do
     end do    
   end subroutine calc_gd_on_edge
-
 
   subroutine calc_pv_on_vertex(state, tend)
     type(state_type), intent(in) :: state
@@ -331,17 +335,18 @@ contains
     
   end subroutine calc_pv_on_vertex
 
-  subroutine calc_energy_on_center(state, tend)
+  subroutine calc_kinetic_on_center(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
-    real sp, np
+    real :: sp, np
     integer :: i, j
+
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%kinetic_energy(i,j) = 1.0 / mesh%cell_area(j) * (mesh%lon_edge_right_area(j) * state%u(i-1,j)**2 +&
-                                                                   mesh%lon_edge_left_area(j)  * state%u(i,j  )**2 +&
-                                                                   mesh%lat_edge_down_area(j)  * state%v(i,j  )**2 +&
-                                                                   mesh%lat_edge_up_area(j-1)  * state%v(i,j-1)**2)      
+        tend%diag%kinetic(i,j) = 1.0 / mesh%cell_area(j) * (mesh%lon_edge_right_area(j) * state%u(i-1,j)**2 +&
+                                                            mesh%lon_edge_left_area(j)  * state%u(i,j  )**2 +&
+                                                            mesh%lat_edge_down_area(j)  * state%v(i,j  )**2 +&
+                                                            mesh%lat_edge_up_area(j-1)  * state%v(i,j-1)**2)      
       end do 
     end do
     
@@ -353,7 +358,7 @@ contains
       end do
       sp = sp / mesh%num_full_lon
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%kinetic_energy(i,j) = sp 
+        tend%diag%kinetic(i,j) = sp 
       end do
     end if 
     
@@ -365,17 +370,18 @@ contains
       end do
       np = np / mesh%num_full_lon
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%kinetic_energy(i,j) = np
+        tend%diag%kinetic(i,j) = np
       end do
     end if
 !!!!!!!!!!!!!!!!!!!
-    do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%energy(i,j) = tend%diag%kinetic_energy(i,j) + state%gd(i,j) + static%ghs(i,j)
-      end do 
-    end do 
-    call parallel_fill_halo(tend%diag%energy, all_halo=.true.)
-  end subroutine calc_energy_on_center
+    ! do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
+    !   do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+    !     tend%diag%energy(i,j) = tend%diag%kinetic(i,j) + state%gd(i,j) + static%ghs(i,j)
+    !   end do 
+    ! end do 
+    call parallel_fill_halo(tend%diag%kinetic, all_halo=.true.)
+    ! call parallel_fill_halo(tend%diag%energy, all_halo=.true.)
+  end subroutine calc_kinetic_on_center
 
   subroutine calc_tangent_mass_flux(state, tend)
     type(state_type), intent(in) :: state
@@ -439,7 +445,7 @@ contains
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_nonlinear(i,j) = -0.5 / mesh%cell_lat_distance(j) * &
+        tend%v_nonlinear(i,j) = 0.5 / mesh%cell_lat_distance(j) * &
                                 (mesh%vertex_lat_distance(j+1) * mesh%full_tangent_wgt(1,j+1) * tend%diag%normal_lon_flux(i-1,j+1) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i-1,j+1)) +&
                                  mesh%vertex_lat_distance(j+1) * mesh%full_tangent_wgt(1,j+1) * tend%diag%normal_lon_flux(i,j+1  ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i,j+1  )) +&
                                  mesh%vertex_lat_distance(j  ) * mesh%full_tangent_wgt(2,j  ) * tend%diag%normal_lon_flux(i-1,j  ) * (tend%diag%pv_lat(i,j) + tend%diag%pv_lon(i-1,j  )) +&
@@ -559,7 +565,6 @@ contains
     call parallel_fill_halo(tend%diag%dpv_lon_n, all_halo = .true.)
   end subroutine calc_dpv_on_edge
 
-
   subroutine calc_pv_on_edge_APVM(state, tend) 
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
@@ -596,7 +601,6 @@ contains
     call parallel_fill_halo(tend%diag%pv_lon, all_halo = .true.)
     call parallel_fill_halo(tend%diag%pv_lat, all_halo = .true.)
   end subroutine calc_pv_on_edge_APVM
-
 
   subroutine calc_total_vorticity_enstrophy(state, tend)
     type(state_type), intent(in) :: state
@@ -649,24 +653,46 @@ contains
 
   end subroutine calc_total_vorticity_enstrophy
 
-
   subroutine energy_gradient_operator(state, tend)
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
 
-    integer i, j
+    real reduced_tend(parallel%half_lon_start_idx:parallel%half_lon_end_idx)
 
+    integer i, j, k
+    
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
-      do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        tend%u_pgf(i,j) = -(tend%diag%energy(i+1,j) - tend%diag%energy(i,j)) / mesh%cell_lon_distance(j)
-      end do
+      if (full_reduce_factor(j) == 1) then
+        do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+          tend%u_pgf(i,j) = (tend%diag%kinetic(i+1,j) + state%gd(i+1,j) + static%ghs(i+1,j) - &
+                             tend%diag%kinetic(i  ,j) - state%gd(i  ,j) - static%ghs(i  ,j)) / mesh%cell_lon_distance(j)
+        end do
+      else
+        tend%u_pgf(:,j) = 0.0
+        do k = 1, full_reduce_factor(j)
+          do i = reduced_start_idx_at_full_lat(j), reduced_end_idx_at_full_lat(j)
+            reduced_tend(i) = ((full_reduced_diag(j)%kinetic(i+1,k,2) + full_reduced_state(j)%gd(i+1,k,2) + full_reduced_static(j)%ghs(i+1,k,2)) -&
+                               (full_reduced_diag(j)%kinetic(i  ,k,2) + full_reduced_state(j)%gd(i  ,k,2) + full_reduced_static(j)%ghs(i  ,k,2))) /&
+                                 mesh%cell_lon_distance(j) / full_reduce_factor(j)
+          end do 
+          call append_reduced_tend_to_raw_tend_at_full_lat(j, k, reduced_tend, tend%u_pgf(:,j))
+        end do
+        call parallel_overlay_inner_halo(tend%u_pgf(:,j), left_halo=.true.)
+        ! do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
+        !   tend%u_pgf(i,j) = (tend%diag%kinetic(i+1,j) + state%gd(i+1,j) + static%ghs(i+1,j) - &
+        !                      tend%diag%kinetic(i  ,j) - state%gd(i  ,j) - static%ghs(i  ,j)) / mesh%cell_lon_distance(j)
+        ! end do
+      end if  
+
     end do
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_pgf(i,j) = -(tend%diag%energy(i,j+1) - tend%diag%energy(i,j)) / mesh%cell_lat_distance(j)
+        tend%v_pgf(i,j) = (tend%diag%kinetic(i,j+1) + state%gd(i,j+1) + static%ghs(i,j+1) -&
+                           tend%diag%kinetic(i,j  ) - state%gd(i,j  ) - static%ghs(i,j  )) / mesh%cell_lat_distance(j)
       end do
     end do
+
   end subroutine energy_gradient_operator
 
   subroutine mass_divergence_operator(state, tend)
@@ -679,7 +705,7 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%mass_div(i,j) = -1.0 / mesh%cell_area(j) * (tend%diag%normal_lat_flux(i,j  ) * mesh%vertex_lon_distance(j  ) -&
+        tend%mass_div(i,j) = 1.0 / mesh%cell_area(j) * (tend%diag%normal_lat_flux(i,j  ) * mesh%vertex_lon_distance(j  ) -&
                                                          tend%diag%normal_lat_flux(i,j-1) * mesh%vertex_lon_distance(j-1) +&
                                                          tend%diag%normal_lon_flux(i,j  ) * mesh%vertex_lat_distance(j  ) -&
                                                          tend%diag%normal_lon_flux(i-1,j) * mesh%vertex_lat_distance(j  ))
@@ -694,7 +720,7 @@ contains
       end do
       sp = sp * mesh%vertex_lon_distance(j) / mesh%num_full_lon / mesh%cell_area(j)
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%mass_div(i,j) = -sp
+        tend%mass_div(i,j) = sp
       end do 
     end if 
     if (parallel%has_north_pole) then 
@@ -705,7 +731,7 @@ contains
       end do
       np = np * mesh%vertex_lon_distance(j-1) / mesh%num_full_lon / mesh%cell_area(j)
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%mass_div(i,j) = -np
+        tend%mass_div(i,j) = np
       end do 
     end if
 
@@ -788,8 +814,8 @@ contains
     ! Do first predict step.
     call space_operators(state(old), tend(old), pass)
     call update_state(dt, tend(old), state(old), state(new))
-     
-    ! Do second predict step.
+
+    ! Do second prinedict step.
     call space_operators(state(new), tend(old), pass)
     call update_state(dt, tend(old), state(old), state(new))
 
@@ -833,12 +859,13 @@ contains
 
     do j = parallel%full_lat_start_idx, parallel%full_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        ip_energy_div = ip_energy_div + tend%diag%energy(i,j) * tend%mass_div(i,j) * mesh%cell_area(j)  
+        ip_energy_div = ip_energy_div + (tend%diag%kinetic(i,j) + state%gd(i,j) + static%ghs(i,j)) * tend%mass_div(i,j) * mesh%cell_area(j)  
         ip_mass_div = ip_mass_div + tend%mass_div(i,j) * mesh%cell_area(j)  
       end do
     end do
     print*, 'nonlinear Coriolis:    ' ,' total energy transfer tendency:', '      total mass tendency:'
     print*, (ip_fv + ip_fu) / radius**2 , (ip_egf + ip_energy_div) / radius**2, ip_mass_div / radius**2
 
-  end subroutine check_spaceoperator  
+  end subroutine check_spaceoperator
+
 end module dycore_mod
