@@ -559,7 +559,6 @@ contains
     call parallel_fill_halo(tend%diag%dpv_lon_n, all_halo = .true.)
   end subroutine calc_dpv_on_edge
 
-
   subroutine calc_pv_on_edge_APVM(state, tend) 
     type(state_type), intent(in) :: state
     type(tend_type), intent(inout) :: tend
