@@ -353,7 +353,7 @@ contains
     type(state_type),  intent(in) :: state
     type(static_type), intent(in) :: static
 
-    integer :: j, k
+    integer :: j, k, i
 
     if (use_zonal_reduce) then
     	do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
@@ -362,8 +362,8 @@ contains
             ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j-1),  full_reduced_state(j)%u(:,k,1))
             call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j  ),  full_reduced_state(j)%u(:,k,2))
             ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j+1),  full_reduced_state(j)%u(:,k,3))
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j-1),  full_reduced_state(j)%v(:,k,1))
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j  ),  full_reduced_state(j)%v(:,k,2))
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j-1),  full_reduced_state(j)%v(:,k,1))
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j  ),  full_reduced_state(j)%v(:,k,2))
             ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j+1),  full_reduced_state(j)%v(:,k,3))
             ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j-1), full_reduced_state(j)%gd(:,k,1))
             ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j  ), full_reduced_state(j)%gd(:,k,2))
@@ -371,7 +371,15 @@ contains
             ! call average_raw_array_to_reduced_array_at_full_lat(j, k, static%ghs(:,j), full_reduced_static(j)%ghs(:,k,2))
             ! call calc_reduced_kinetic(j, k)
 
-    			end do 
+    			end do
+          do k = 1, full_reduce_factor(j)
+            do i = 1, full_reduced_mesh(j)%num_full_lon
+              full_reduced_diag(j)%kinetic(i,k,2) = 1.0 / full_reduced_mesh(j)%cell_area * (full_reduced_mesh(j)%lon_edge_left_area  * full_reduced_state(j)%u(i,k,2)**2 +&
+                                                                                          full_reduced_mesh(j)%lon_edge_right_area * full_reduced_state(j)%u(i-1,k,2)**2 +&
+                                                                                          full_reduced_mesh(j)%lat_edge_down_area * full_reduced_state(j)%v(i,k,2)**2 +&
+                                                                                          full_reduced_mesh(j)%lat_edge_up_area   * full_reduced_state(j)%v(i,k,1)**2 )
+            end do
+          end do  
     		end if  
     	end do 
  
