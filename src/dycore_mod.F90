@@ -156,13 +156,13 @@ contains
     type(tend_type), intent(inout) :: tend
     integer, intent(in) :: pass 
     integer i, j
+    
+    call reduce_run(state, static)
 
     call calc_normal_mass_flux(state, tend)
     call calc_pv_on_vertex(state,tend)
     call calc_kinetic_on_center(state, tend)
     call calc_tangent_mass_flux(state, tend)
-
-    call reduce_run(state, static)
 
     select case (pass)
     case (all_pass)
@@ -174,7 +174,7 @@ contains
 
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%du(i,j) = -tend%u_pgf(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
+          tend%du(i,j) = -tend%dEdlon(i,j) + tend%u_nonlinear(i,j) + tend%force%u(i,j)
         end do
       end do
       if (test_case == "held_suarez") then
@@ -182,7 +182,7 @@ contains
       else
         do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
           do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-            tend%dv(i,j) = -tend%v_pgf(i,j) - tend%v_nonlinear(i,j) + tend%force%v(i,j)
+            tend%dv(i,j) = -tend%dEdlat(i,j) - tend%v_nonlinear(i,j) + tend%force%v(i,j)
           end do
         end do
       end if 
@@ -194,8 +194,8 @@ contains
       end do
     case (slow_pass)
 #ifndef NDEBUG
-      tend%u_pgf = 0.0
-      tend%v_pgf = 0.0
+      tend%dEdlon = 0.0
+      tend%dEdlat = 0.0
       tend%mass_div = 0.0
 #endif 
       call nonlinear_coriolis_operator(state, tend)
@@ -222,13 +222,13 @@ contains
 
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%du(i,j) = tend%u_pgf(i,j) 
+          tend%du(i,j) = tend%dEdlon(i,j) 
         end do
       end do
 
       do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
         do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-          tend%dv(i,j) = tend%v_pgf(i,j)
+          tend%dv(i,j) = tend%dEdlat(i,j)
         end do
       end do
 
@@ -341,13 +341,16 @@ contains
     real :: sp, np
     integer :: i, j
 
+
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
-      do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%diag%kinetic(i,j) = 1.0 / mesh%cell_area(j) * (mesh%lon_edge_right_area(j) * state%u(i-1,j)**2 +&
-                                                            mesh%lon_edge_left_area(j)  * state%u(i,j  )**2 +&
-                                                            mesh%lat_edge_down_area(j)  * state%v(i,j  )**2 +&
-                                                            mesh%lat_edge_up_area(j-1)  * state%v(i,j-1)**2)      
-      end do 
+      if (full_reduce_factor(j) == 1) then
+        do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
+          tend%diag%kinetic(i,j) = 1.0 / mesh%cell_area(j) * (mesh%lon_edge_right_area(j) * state%u(i-1,j)**2 +&
+                                                              mesh%lon_edge_left_area(j)  * state%u(i,j  )**2 +&
+                                                              mesh%lat_edge_down_area(j)  * state%v(i,j  )**2 +&
+                                                              mesh%lat_edge_up_area(j-1)  * state%v(i,j-1)**2)      
+        end do 
+      end if 
     end do
     
     if (parallel%has_south_pole) then
@@ -664,31 +667,26 @@ contains
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       if (full_reduce_factor(j) == 1) then
         do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-          tend%u_pgf(i,j) = (tend%diag%kinetic(i+1,j) + state%gd(i+1,j) + static%ghs(i+1,j) - &
+          tend%dEdlon(i,j) = (tend%diag%kinetic(i+1,j) + state%gd(i+1,j) + static%ghs(i+1,j) - &
                              tend%diag%kinetic(i  ,j) - state%gd(i  ,j) - static%ghs(i  ,j)) / mesh%cell_lon_distance(j)
         end do
       else
-        tend%u_pgf(:,j) = 0.0
+        tend%dEdlon(:,j) = 0.0
         do k = 1, full_reduce_factor(j)
           do i = reduced_start_idx_at_full_lat(j), reduced_end_idx_at_full_lat(j)
             reduced_tend(i) = ((full_reduced_diag(j)%kinetic(i+1,k,2) + full_reduced_state(j)%gd(i+1,k,2) + full_reduced_static(j)%ghs(i+1,k,2)) -&
                                (full_reduced_diag(j)%kinetic(i  ,k,2) + full_reduced_state(j)%gd(i  ,k,2) + full_reduced_static(j)%ghs(i  ,k,2))) /&
                                  mesh%cell_lon_distance(j) / full_reduce_factor(j)
           end do 
-          call append_reduced_tend_to_raw_tend_at_full_lat(j, k, reduced_tend, tend%u_pgf(:,j))
+          call append_reduced_tend_to_raw_tend_at_full_lat(j, k, reduced_tend, tend%dEdlon(:,j))
         end do
-        call parallel_overlay_inner_halo(tend%u_pgf(:,j), left_halo=.true.)
-        ! do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        !   tend%u_pgf(i,j) = (tend%diag%kinetic(i+1,j) + state%gd(i+1,j) + static%ghs(i+1,j) - &
-        !                      tend%diag%kinetic(i  ,j) - state%gd(i  ,j) - static%ghs(i  ,j)) / mesh%cell_lon_distance(j)
-        ! end do
+        call parallel_overlay_inner_halo(tend%dEdlon(:,j), left_halo=.true.)
       end if  
-
     end do
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        tend%v_pgf(i,j) = (tend%diag%kinetic(i,j+1) + state%gd(i,j+1) + static%ghs(i,j+1) -&
+        tend%dEdlat(i,j) = (tend%diag%kinetic(i,j+1) + state%gd(i,j+1) + static%ghs(i,j+1) -&
                            tend%diag%kinetic(i,j  ) - state%gd(i,j  ) - static%ghs(i,j  )) / mesh%cell_lat_distance(j)
       end do
     end do
@@ -845,14 +843,14 @@ contains
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       do i = parallel%half_lon_start_idx, parallel%half_lon_end_idx
-        ip_egf = ip_egf + tend%u_pgf(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j)   
+        ip_egf = ip_egf + tend%dEdlon(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j)   
         ip_fv = ip_fv + tend%u_nonlinear(i,j) * tend%diag%normal_lon_flux(i,j) * mesh%lon_edge_area(j)  
       end do 
     end do 
 
     do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx
       do i = parallel%full_lon_start_idx, parallel%full_lon_end_idx
-        ip_egf = ip_egf + tend%v_pgf(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j)   
+        ip_egf = ip_egf + tend%dEdlat(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j)   
         ip_fu = ip_fu + tend%v_nonlinear(i,j) * tend%diag%normal_lat_flux(i,j) * mesh%lat_edge_area(j) 
       end do 
     end do 

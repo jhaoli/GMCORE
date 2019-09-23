@@ -67,8 +67,8 @@ module types_mod
   type tend_type
     real, allocatable :: u_nonlinear(:,:)
     real, allocatable :: v_nonlinear(:,:)
-    real, allocatable :: u_pgf(:,:)
-    real, allocatable :: v_pgf(:,:)
+    real, allocatable :: dEdlon(:,:)
+    real, allocatable :: dEdlat(:,:)
     real, allocatable :: mass_div(:,:)
     real, allocatable :: du(:,:)
     real, allocatable :: dv(:,:)
@@ -131,10 +131,10 @@ contains
     type(tend_type), intent(out) :: tend
 
     if (.not. allocated(tend%u_nonlinear))    call parallel_allocate(tend%u_nonlinear,                     half_lon=.true., extended_halo=.true.)
-    if (.not. allocated(tend%u_pgf))          call parallel_allocate(tend%u_pgf,                           half_lon=.true., extended_halo=.true.)
+    if (.not. allocated(tend%dEdlon))         call parallel_allocate(tend%dEdlon,                          half_lon=.true., extended_halo=.true.)
     if (.not. allocated(tend%du))             call parallel_allocate(tend%du,                              half_lon=.true., extended_halo=.true.)
     if (.not. allocated(tend%v_nonlinear))    call parallel_allocate(tend%v_nonlinear,                     half_lat=.true., extended_halo=.true.)
-    if (.not. allocated(tend%v_pgf))          call parallel_allocate(tend%v_pgf,                           half_lat=.true., extended_halo=.true.)
+    if (.not. allocated(tend%dEdlat))         call parallel_allocate(tend%dEdlat,                          half_lat=.true., extended_halo=.true.)
     if (.not. allocated(tend%dv))             call parallel_allocate(tend%dv,                              half_lat=.true., extended_halo=.true.)
     if (.not. allocated(tend%mass_div))       call parallel_allocate(tend%mass_div,                                         extended_halo=.true.)
     if (.not. allocated(tend%dgd))            call parallel_allocate(tend%dgd,                                              extended_halo=.true.)
@@ -198,8 +198,8 @@ contains
 
     if (allocated(tend%u_nonlinear))    deallocate(tend%u_nonlinear)
     if (allocated(tend%v_nonlinear))    deallocate(tend%v_nonlinear)
-    if (allocated(tend%u_pgf))          deallocate(tend%u_pgf)
-    if (allocated(tend%v_pgf))          deallocate(tend%v_pgf)
+    if (allocated(tend%dEdlon))         deallocate(tend%dEdlon)
+    if (allocated(tend%dEdlat))         deallocate(tend%dEdlat)
     if (allocated(tend%mass_div))       deallocate(tend%mass_div)
     if (allocated(tend%du))             deallocate(tend%du)
     if (allocated(tend%dv))             deallocate(tend%dv)
