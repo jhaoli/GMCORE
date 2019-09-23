@@ -1,13 +1,13 @@
 &dycore_params
 test_case = 'steady_geostrophic_flow'
-case_name = 'gf_c_u_01.1440x721.dt30'
+case_name = 'gf_c_u_01.360x181.dt120'
 case_desc = 'Steady_geostrophic flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
 run_days = 5
-num_lon = 1440
-num_lat = 721
-time_step_size = 30
-history_periods = '1 days'
+num_lon = 360
+num_lat = 181
+time_step_size = 120
+history_periods = '1 hours'
 restart_period = '10 days'
 pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind with beta'
 pv_pole_scheme = .false.
