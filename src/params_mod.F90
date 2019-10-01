@@ -55,6 +55,8 @@ module params_mod
 
   logical :: use_zonal_reduce = .false.
   integer :: zonal_reduce_factors(20) = 0
+  logical :: reduce_dEdlon = .false.
+  logical :: reduce_massdiv= .false.
 
   logical is_restart_run
 
@@ -83,6 +85,8 @@ module params_mod
     pv_pole_scheme, &
     use_zonal_reduce,&
     zonal_reduce_factors,&
+    reduce_dEdlon,&
+    reduce_massdiv,&
     time_scheme, &
     time_order, &
     qcon_modified, &

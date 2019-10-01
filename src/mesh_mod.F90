@@ -154,7 +154,7 @@ contains
       if (j == 1) then
         mesh%cell_area(j) = radius**2 * mesh%dlon * ( mesh%half_sin_lat(1) + 1.0)
         mesh%subcell_area(1,j) = 0.0
-        mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) +1.0)
+        mesh%subcell_area(2,j) = radius**2 * mesh%dlon * 0.5 * (mesh%half_sin_lat(j) + 1.0)
       else if (j == mesh%num_full_lat) then 
         mesh%cell_area(j) = radius**2 * mesh%dlon * (1 - mesh%half_sin_lat(j-1))
         mesh%subcell_area(1,j) = radius**2 * mesh%dlon * 0.5 * (1.0 - mesh%half_sin_lat(j-1))
@@ -166,7 +166,7 @@ contains
         call cartesian_transform(mesh%full_lon(1), mesh%full_lat(j  ), x(1), y(1), z(1))
         call cartesian_transform(mesh%half_lon(1), mesh%half_lat(j-1), x(2), y(2), z(2))
         call cartesian_transform(mesh%half_lon(1), mesh%half_lat(j  ), x(3), y(3), z(3))
-        mesh%lon_edge_left_area(j) = calc_area(x, y, z)
+        mesh%lon_edge_left_area(j)  = calc_area(x, y, z)
         mesh%lon_edge_right_area(j) = mesh%lon_edge_left_area(j)
         mesh%lon_edge_area(j) = mesh%lon_edge_left_area(j) + mesh%lon_edge_right_area(j)
       end if 

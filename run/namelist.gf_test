@@ -17,5 +17,7 @@ qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 subcycles = 8
 use_zonal_reduce = .true.
-zonal_reduce_factors = 4,2
+zonal_reduce_factors = 4,4,2,2,2
+reduce_massdiv = .true.
+reduce_dEdlon  = .false.
 /

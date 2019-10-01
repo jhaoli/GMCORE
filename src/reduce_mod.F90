@@ -60,6 +60,8 @@ module reduce_mod
   
   type reduced_diag_type
     real, allocatable :: kinetic(:,:,:)
+    real, allocatable :: normal_lat_flux(:,:,:)
+    real, allocatable :: normal_lon_flux(:,:,:)
   end type reduced_diag_type
 
   type reduced_mesh_type
@@ -77,6 +79,7 @@ module reduce_mod
     real, allocatable :: half_sin_lat(:)
     real, allocatable :: half_cos_lat(:)
     real cell_area
+    real, allocatable :: vertex_area(:) 
     real, allocatable :: subcell_area(:)
 
     real lon_edge_area 
@@ -107,13 +110,14 @@ contains
   subroutine reduce_init()
     call reduce_mesh_init()
     call reduce_array_init()
+    call log_notice('Reduce module is initialized.')
   end subroutine reduce_init
 
   subroutine reduce_mesh_init()
     integer :: i, j, k
     real x(3), y(3), z(3)
     integer :: start_idx, end_idx
-    real :: tmp
+    real :: total_area, tmp
     
     if(.not. allocated(full_reduce_factor)) allocate(full_reduce_factor(mesh%num_full_lat))
     if(.not. allocated(half_reduce_factor)) allocate(half_reduce_factor(mesh%num_half_lat))
@@ -151,12 +155,26 @@ contains
         if(.not. allocated(full_reduced_mesh(j,2)%full_lon))     allocate(full_reduced_mesh(j,2)%full_lon(    reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
         if(.not. allocated(full_reduced_mesh(j,3)%full_lon))     allocate(full_reduced_mesh(j,3)%full_lon(    reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
         if(.not. allocated(full_reduced_mesh(j,2)%full_lon_deg)) allocate(full_reduced_mesh(j,2)%full_lon_deg(reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
+        
+        if(.not. allocated(full_reduced_mesh(j,1)%half_lon))     allocate(full_reduced_mesh(j,1)%half_lon(    reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
         if(.not. allocated(full_reduced_mesh(j,2)%half_lon))     allocate(full_reduced_mesh(j,2)%half_lon(    reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
+        if(.not. allocated(full_reduced_mesh(j,3)%half_lon))     allocate(full_reduced_mesh(j,3)%half_lon(    reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
         if(.not. allocated(full_reduced_mesh(j,2)%half_lon_deg)) allocate(full_reduced_mesh(j,2)%half_lon_deg(reduced_start_idx_at_full_lat(j):reduced_end_idx_at_full_lat(j)))
+        
+        if(.not. allocated(full_reduced_mesh(j,1)%half_lat))     allocate(full_reduced_mesh(j,1)%half_lat(2))
         if(.not. allocated(full_reduced_mesh(j,2)%half_lat))     allocate(full_reduced_mesh(j,2)%half_lat(2))
+        if(.not. allocated(full_reduced_mesh(j,3)%half_lat))     allocate(full_reduced_mesh(j,3)%half_lat(2))
+
+        if(.not. allocated(full_reduced_mesh(j,1)%half_sin_lat)) allocate(full_reduced_mesh(j,1)%half_sin_lat(2))
         if(.not. allocated(full_reduced_mesh(j,2)%half_sin_lat)) allocate(full_reduced_mesh(j,2)%half_sin_lat(2))
+        if(.not. allocated(full_reduced_mesh(j,3)%half_sin_lat)) allocate(full_reduced_mesh(j,3)%half_sin_lat(2))
+
+        if(.not. allocated(full_reduced_mesh(j,1)%half_cos_lat)) allocate(full_reduced_mesh(j,1)%half_cos_lat(2))
         if(.not. allocated(full_reduced_mesh(j,2)%half_cos_lat)) allocate(full_reduced_mesh(j,2)%half_cos_lat(2))
+        if(.not. allocated(full_reduced_mesh(j,3)%half_cos_lat)) allocate(full_reduced_mesh(j,3)%half_cos_lat(2))
+        
         if(.not. allocated(full_reduced_mesh(j,2)%subcell_area)) allocate(full_reduced_mesh(j,2)%subcell_area(2))
+        
         if(.not. allocated(full_reduced_mesh(j,2)%lat_edge_area))allocate(full_reduced_mesh(j,2)%lat_edge_area(2))
         if(.not. allocated(full_reduced_mesh(j,2)%vertex_lon_distance)) allocate(full_reduced_mesh(j,2)%vertex_lon_distance(2))
         if(.not. allocated(full_reduced_mesh(j,2)%cell_lat_distance))   allocate(full_reduced_mesh(j,2)%cell_lat_distance(2))
@@ -183,18 +201,27 @@ contains
           full_reduced_mesh(j,2)%full_lon_deg(i) = full_reduced_mesh(j,2)%full_lon(i) * rad_to_deg
           full_reduced_mesh(j,2)%half_lon_deg(i) = full_reduced_mesh(j,2)%half_lon(i) * rad_to_deg
           ! print*, full_reduced_mesh(j)%full_lon_deg(i, k), full_reduced_mesh(j)%half_lon_deg(i, k)
+          full_reduced_mesh(j,3)%full_lon(i) = full_reduced_mesh(j,2)%full_lon(i)
+          full_reduced_mesh(j,1)%full_lon(i) = full_reduced_mesh(j,2)%full_lon(i)
+          full_reduced_mesh(j,3)%half_lon(i) = full_reduced_mesh(j,2)%half_lon(i)
+          full_reduced_mesh(j,1)%half_lon(i) = full_reduced_mesh(j,2)%half_lon(i)
         end do
-        full_reduced_mesh(j,3)%full_lon(:) = full_reduced_mesh(j,2)%full_lon(:)
-        full_reduced_mesh(j,1)%full_lon(:) = full_reduced_mesh(j,2)%full_lon(:)
-        full_reduced_mesh(j,3)%half_lon(:) = full_reduced_mesh(j,2)%half_lon(:)
-        full_reduced_mesh(j,1)%half_lon(:) = full_reduced_mesh(j,2)%half_lon(:)
+        
 
         full_reduced_mesh(j,1)%full_lat = mesh%full_lat(j-1) 
-        full_reduced_mesh(j,3)%full_lat = mesh%full_lat(j+1)
-
         full_reduced_mesh(j,2)%full_lat = mesh%full_lat(j)
+        full_reduced_mesh(j,3)%full_lat = mesh%full_lat(j+1)
+        
+        full_reduced_mesh(j,1)%half_lat(1) = mesh%half_lat(j-2)
+        full_reduced_mesh(j,1)%half_lat(2) = mesh%half_lat(j-1)
+
         full_reduced_mesh(j,2)%half_lat(1) = mesh%half_lat(j-1)
         full_reduced_mesh(j,2)%half_lat(2) = mesh%half_lat(j)
+
+        full_reduced_mesh(j,3)%half_lat(1) = mesh%half_lat(j)
+        full_reduced_mesh(j,3)%half_lat(2) = mesh%half_lat(j+1)
+
+       
         ! print*, full_reduced_mesh(j)%full_lat * rad_to_deg, full_reduced_mesh(j)%half_lat(1)*rad_to_deg, full_reduced_mesh(j)%half_lat(2) * rad_to_deg
         
         full_reduced_mesh(j,2)%full_sin_lat    = sin(full_reduced_mesh(j,2)%full_lat)
@@ -206,9 +233,10 @@ contains
         full_reduced_mesh(j,2)%half_cos_lat(2) = cos(full_reduced_mesh(j,2)%half_lat(2))
       end if 
     end do
-    stop 'ab'
+    
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       if (full_reduce_factor(j) /= 1) then
+        
         full_reduced_mesh(j,2)%cell_area = radius**2 * full_reduced_mesh(j,2)%dlon * (full_reduced_mesh(j,2)%half_sin_lat(2) - full_reduced_mesh(j,2)%half_sin_lat(1)) 
         full_reduced_mesh(j,2)%subcell_area(1) = radius**2 * full_reduced_mesh(j,2)%dlon * 0.5 * (full_reduced_mesh(j,2)%full_sin_lat - full_reduced_mesh(j,2)%half_sin_lat(1))
         full_reduced_mesh(j,2)%subcell_area(2) = radius**2 * full_reduced_mesh(j,2)%dlon * 0.5 * (full_reduced_mesh(j,2)%half_sin_lat(2) - full_reduced_mesh(j,2)%full_sin_lat) 
@@ -216,22 +244,28 @@ contains
         call cartesian_transform(full_reduced_mesh(j,2)%full_lon(1), full_reduced_mesh(j,2)%full_lat, x(1), y(1), z(1))
         call cartesian_transform(full_reduced_mesh(j,2)%half_lon(1), full_reduced_mesh(j,2)%half_lat(1), x(2), y(2), z(2))
         call cartesian_transform(full_reduced_mesh(j,2)%half_lon(1), full_reduced_mesh(j,2)%half_lat(2), x(3), y(3), z(3))
+        
         full_reduced_mesh(j,2)%lon_edge_left_area  = calc_area(x, y, z)
         full_reduced_mesh(j,2)%lon_edge_right_area = full_reduced_mesh(j,2)%lon_edge_left_area
         full_reduced_mesh(j,2)%lon_edge_area       = full_reduced_mesh(j,2)%lon_edge_left_area + full_reduced_mesh(j,2)%lon_edge_right_area
-        stop "aa"
+        
         call cartesian_transform(full_reduced_mesh(j,2)%full_lon(2), full_reduced_mesh(j,2)%full_lat, x(1), y(1), z(1))
         call cartesian_transform(full_reduced_mesh(j,2)%half_lon(2), full_reduced_mesh(j,2)%half_lat(2), x(2), y(2), z(2))
         call cartesian_transform(full_reduced_mesh(j,2)%half_lon(1), full_reduced_mesh(j,2)%half_lat(2), x(3), y(3), z(3))
         full_reduced_mesh(j,2)%lat_edge_down_area = calc_area_with_last_small_arc(x, y, z)
-        
+
+        call cartesian_transform(full_reduced_mesh(j,2)%full_lon(2), full_reduced_mesh(j,2)%full_lat, x(1), y(1), z(1))
+        call cartesian_transform(full_reduced_mesh(j,2)%half_lon(1), full_reduced_mesh(j,2)%half_lat(1), x(2), y(2), z(2))
+        call cartesian_transform(full_reduced_mesh(j,2)%half_lon(2), full_reduced_mesh(j,2)%half_lat(1), x(3), y(3), z(3))
+        full_reduced_mesh(j,2)%lat_edge_up_area = calc_area_with_last_small_arc(x, y, z)
+
         call cartesian_transform(full_reduced_mesh(j,3)%full_lon(2), full_reduced_mesh(j,3)%full_lat, x(1), y(1), z(1))
         call cartesian_transform(full_reduced_mesh(j,3)%half_lon(1), full_reduced_mesh(j,3)%half_lat(1), x(2), y(2), z(2))
         call cartesian_transform(full_reduced_mesh(j,3)%half_lon(2), full_reduced_mesh(j,3)%half_lat(1), x(3), y(3), z(3))
         full_reduced_mesh(j,3)%lat_edge_up_area = calc_area_with_last_small_arc(x, y, z)
-        
-        full_reduced_mesh(j,2)%lat_edge_area(2) = full_reduced_mesh(j,2)%lat_edge_down_area + full_reduced_mesh(j,3)%lat_edge_up_area
 
+        full_reduced_mesh(j,2)%lat_edge_area(2) = full_reduced_mesh(j,2)%lat_edge_down_area + full_reduced_mesh(j,3)%lat_edge_up_area
+        
         call cartesian_transform(full_reduced_mesh(j,1)%full_lon(2), full_reduced_mesh(j,1)%full_lat, x(1), y(1), z(1))
         call cartesian_transform(full_reduced_mesh(j,1)%half_lon(2), full_reduced_mesh(j,1)%half_lat(2), x(2), y(2), z(2))
         call cartesian_transform(full_reduced_mesh(j,1)%half_lon(1), full_reduced_mesh(j,1)%half_lat(2), x(3), y(3), z(3))
@@ -239,17 +273,16 @@ contains
 
         full_reduced_mesh(j,2)%lat_edge_area(1) = full_reduced_mesh(j,2)%lat_edge_up_area + full_reduced_mesh(j,1)%lat_edge_down_area
       end if 
-      ! print*, 2 * mesh%cell_area(j), full_reduced_mesh(j)%cell_area, full_reduced_mesh(j)%lon_edge_area+ full_reduced_mesh(j)%lat_edge_down_area +full_reduced_mesh(j)%lat_edge_up_area
+      ! print*, 4 * mesh%cell_area(j), full_reduced_mesh(j,2)%cell_area, full_reduced_mesh(j,2)%lon_edge_area+ full_reduced_mesh(j,2)%lat_edge_down_area +full_reduced_mesh(j,2)%lat_edge_up_area
     end do
-
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       if (full_reduce_factor(j) /= 1) then
         full_reduced_mesh(j,2)%vertex_lat_distance = radius * mesh%dlat
         full_reduced_mesh(j,2)%cell_lon_distance = 2.0 * full_reduced_mesh(j,2)%lon_edge_area / full_reduced_mesh(j,2)%vertex_lat_distance
-        print*, full_reduced_mesh(j,2)%cell_lon_distance, mesh%cell_lon_distance(j) * full_reduce_factor(j) 
+        ! print*, full_reduced_mesh(j,2)%cell_lon_distance, mesh%cell_lon_distance(j) * full_reduce_factor(j) 
       end if 
     end do 
-    stop "reduce_mod"
+    
 
     do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       if (full_reduce_factor(j) /= 1) then
@@ -326,7 +359,7 @@ contains
     integer i,j,k
 
     if(.not. allocated(full_reduce_weight)) allocate(full_reduce_weight(maxval(zonal_reduce_factors), mesh%num_full_lat))
-    ! if(.not. allocated(half_reduce_weight)) allocate(half_reduce_weight(maxval(zonal_reduce_factors), mesh%num_half_lat))
+    if(.not. allocated(half_reduce_weight)) allocate(half_reduce_weight(maxval(zonal_reduce_factors), mesh%num_half_lat))
     if(.not. allocated(full_reduced_state)) allocate(full_reduced_state(parallel%full_lat_start_idx_no_pole:parallel%full_lat_end_idx_no_pole))
     ! if(.not. allocated(half_reduced_state)) allocate(half_reduced_state(parallel%half_lat_start_idx:parallel%half_lat_end_idx))
     if(.not. allocated(full_reduced_static)) allocate(full_reduced_static(parallel%full_lat_start_idx_no_pole:parallel%full_lat_end_idx_no_pole))
@@ -350,11 +383,14 @@ contains
       !Allocate reduced data arrays.
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
       	if (full_reduce_factor(j) /= 1) then
-          call parallel_allocate(full_reduced_state(j)%u,      dim=[2,3], size=[full_reduce_factor(j),3], half_lon=.true.)
-          call parallel_allocate(full_reduced_state(j)%v,      dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true.) ! ?? half_lat 
-          call parallel_allocate(full_reduced_state(j)%gd,     dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true.)
-          call parallel_allocate(full_reduced_static(j)%ghs,   dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true.)
-          call parallel_allocate(full_reduced_diag(j)%kinetic, dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true., extended_halo=.true.)
+          call parallel_allocate(full_reduced_state(j)%u,      dim=[2,3], size=[full_reduce_factor(j),3], half_lon=.true., extended_halo=.true.)
+          call parallel_allocate(full_reduced_state(j)%v,      dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true., extended_halo=.true.) 
+          call parallel_allocate(full_reduced_state(j)%gd,     dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true., extended_halo=.true.)
+          call parallel_allocate(full_reduced_static(j)%ghs,   dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true., extended_halo=.true.)
+
+          call parallel_allocate(full_reduced_diag(j)%kinetic,         dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true., extended_halo=.true.)
+          call parallel_allocate(full_reduced_diag(j)%normal_lat_flux, dim=[2,3], size=[full_reduce_factor(j),3], full_lon=.true., extended_halo=.true.)
+          call parallel_allocate(full_reduced_diag(j)%normal_lon_flux, dim=[2,3], size=[full_reduce_factor(j),3], half_lon=.true., extended_halo=.true.)
           
         end if 
       end do 
@@ -427,44 +463,74 @@ contains
     	do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
     		if (full_reduce_factor(j) > 1) then
     			do k = 1, full_reduce_factor(j)
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j-1),  full_reduced_state(j)%u(:,k,1))
-
+           
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j-1),  full_reduced_state(j)%u(:,k,1))
             call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j  ),  full_reduced_state(j)%u(:,k,2))
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j+1),  full_reduced_state(j)%u(:,k,3))
+
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%u(:,j+1),  full_reduced_state(j)%u(:,k,3))
+
             call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j-1),  full_reduced_state(j)%v(:,k,1))
             call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j  ),  full_reduced_state(j)%v(:,k,2))
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j+1),  full_reduced_state(j)%v(:,k,3))
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j-1), full_reduced_state(j)%gd(:,k,1))
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%v(:,j+1),  full_reduced_state(j)%v(:,k,3))
+
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j-1), full_reduced_state(j)%gd(:,k,1))
             call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j  ), full_reduced_state(j)%gd(:,k,2))
-            ! call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j+1), full_reduced_state(j)%gd(:,k,3))
+            call average_raw_array_to_reduced_array_at_full_lat(j, k, state%gd(:,j+1), full_reduced_state(j)%gd(:,k,3))
+
             call average_raw_array_to_reduced_array_at_full_lat(j, k, static%ghs(:,j), full_reduced_static(j)%ghs(:,k,2))      
     			end do
     		end if 
       end do
-
+   
+      !(1) diagnose kinetic energy at reduced cell centers
       do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
         if (full_reduce_factor(j) > 1) then
           do k = 1, full_reduce_factor(j)
-            do i = reduced_start_idx_at_full_lat(j), reduced_end_idx_at_full_lat(j)
+            do i = reduced_start_idx_at_full_lat(j)-1, reduced_end_idx_at_full_lat(j)
               full_reduced_diag(j)%kinetic(i,k,2) = 1.0 / full_reduced_mesh(j,2)%cell_area * (full_reduced_mesh(j,2)%lon_edge_left_area  * full_reduced_state(j)%u(i,  k,2)**2 +&
-                                                                                          full_reduced_mesh(j,2)%lon_edge_right_area * full_reduced_state(j)%u(i-1,k,2)**2 +&
-                                                                                          full_reduced_mesh(j,2)%lat_edge_down_area  * full_reduced_state(j)%v(i,  k,2)**2 +&
-                                                                                          full_reduced_mesh(j,2)%lat_edge_up_area    * full_reduced_state(j)%v(i,  k,1)**2 )
+                                                                                              full_reduced_mesh(j,2)%lon_edge_right_area * full_reduced_state(j)%u(i-1,k,2)**2 +&
+                                                                                              full_reduced_mesh(j,2)%lat_edge_down_area  * full_reduced_state(j)%v(i,  k,2)**2 +&
+                                                                                              full_reduced_mesh(j,2)%lat_edge_up_area    * full_reduced_state(j)%v(i,  k,1)**2 )
               ! print*, full_reduced_state(j)%u(i,k,2)**2, full_reduced_diag(j)%kinetic(i,k)
             end do
             ! print*, full_reduced_diag(j)%kinetic(1:5,k,2)
             ! Fill halo for reduced array.
-            m = (size(full_reduced_diag(j)%kinetic(:,k,2)) - 2 * parallel%lon_halo_width_for_reduce) / full_reduce_factor(j) 
-            full_reduced_diag(j)%kinetic(1-n:0,k,2) = full_reduced_diag(j)%kinetic(m-n+1:m, k, 2)
-            full_reduced_diag(j)%kinetic(m+1:m+n, k,2) = full_reduced_diag(j)%kinetic(1:n, k,2)
+            ! m = (size(full_reduced_diag(j)%kinetic(:,k,2)) - 2 * parallel%lon_halo_width_for_reduce) / full_reduce_factor(j) 
+            ! full_reduced_diag(j)%kinetic(1-n:0,k,2) = full_reduced_diag(j)%kinetic(m-n+1:m, k, 2)
+            ! full_reduced_diag(j)%kinetic(m+1:m+n, k,2) = full_reduced_diag(j)%kinetic(1:n, k,2)
             ! print*, full_reduced_diag(j)%kinetic(:,k,2)
             
           end do 
         end if 
       end do  
-      
- 
-    	! do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx 
+      !(2) diagnose normal mass flux at reduced cell edges
+      ! do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+      !   if (full_reduce_factor(j) > 1) then
+      !     do k = 1, full_reduce_factor(j)
+      !       do i = reduced_start_idx_at_full_lat(j), reduced_end_idx_at_full_lat(j)
+      !       full_reduced_diag(j)%normal_lat_flux(i,k,1) = (full_reduced_state(j)%gd(i,k,1) * full_reduced_mesh(j,1)%lat_edge_down_area +&
+      !                                                      full_reduced_state(j)%gd(i,k,2) * full_reduced_mesh(j,2)%lat_edge_up_area ) /&
+      !                                                      full_reduced_mesh(j,2)%lat_edge_area(1) * full_reduced_state(j)%v(i,k,1)
+      !       full_reduced_diag(j)%normal_lat_flux(i,k,2) = (full_reduced_state(j)%gd(i,k,3) * full_reduced_mesh(j,3)%lat_edge_up_area +&
+      !                                                      full_reduced_state(j)%gd(i,j,2) * full_reduced_mesh(j,2)%lat_edge_down_area ) /&
+      !                                                      full_reduced_mesh(j,2)%lat_edge_area(2) * full_reduced_state(j)%v(i,k,2)                                      
+      !       end do 
+      !     end do 
+      !   end if 
+      ! end do 
+      do j = parallel%full_lat_start_idx_no_pole, parallel%full_lat_end_idx_no_pole
+        if (full_reduce_factor(j) > 1) then
+          do k = 1, full_reduce_factor(j)
+            do i = reduced_start_idx_at_full_lat(j)-1, reduced_end_idx_at_full_lat(j)
+            full_reduced_diag(j)%normal_lon_flux(i,k,2) = (full_reduced_state(j)%gd(i,  k,2) * full_reduced_mesh(j,2)%lon_edge_left_area +&
+                                                           full_reduced_state(j)%gd(i+1,k,2) * full_reduced_mesh(j,2)%lon_edge_right_area ) /&
+                                                           full_reduced_mesh(j,2)%lon_edge_area * full_reduced_state(j)%u(i,k,2)                                          
+            end do
+          end do 
+        end if 
+      end do 
+  
+     ! do j = parallel%half_lat_start_idx, parallel%half_lat_end_idx 
      !    if (half_reduce_factor(j) > 1) then
      !    	do k =1, half_reduce_factor(j)
      !        ! call average_raw_array_to_reduced_array_at_half_lat(j, k, state%u(:,j-1),  half_reduced_state(j)%u(:,k,1))
@@ -478,7 +544,7 @@ contains
      !        ! call average_raw_array_to_reduced_array_at_half_lat(j, k, state%gd(:,j+1), half_reduced_state(j)%gd(:,k,3))
      !      end do 
      !    end if 
-    	! end do 
+     ! end do 
     end if
 
  	end subroutine reduce_run
@@ -491,7 +557,6 @@ contains
     real, intent(out) :: reduced_array(:)
 
     integer :: i, l, count, m, n 
-    ! print*, sum(raw_array(5:8)) / 4
     
     n = parallel%lon_halo_width_for_reduce
 
@@ -561,7 +626,6 @@ contains
         count = 0
       end if 
     end do 
- 
   end subroutine append_reduced_tend_to_raw_tend_at_full_lat
 
   subroutine append_reduced_tend_to_raw_tend_at_half_lat(j, k, reduced_tend, raw_tend)

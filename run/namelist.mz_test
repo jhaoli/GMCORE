@@ -3,20 +3,22 @@ test_case = 'mountain_zonal_flow'
 case_name = 'mz_c_u_01.180x91.dt30'
 case_desc = 'Mountain zonal flow test'
 author = 'Li Dong <dongli@lasg.iap.ac.cn>'
-run_days = 1
+run_days = 20
 num_lon = 180
 num_lat = 91
 time_step_size = 30
 history_periods = '30 seconds'
 restart_period = '10 days'
-pv_scheme = 4 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind with beta'
+pv_scheme = 1 ! 1-'midpoint', 2-'1D upwind with beta', 3-'APVM', 4-'2D upwind with beta'
 pv_pole_scheme = .false.
 tangent_wgt_scheme = 'classic' ! 'classic' or 'thuburn09'
 time_scheme = 'predict_correct' ! 'predict_correct' or 'runge_kutta2'
 qcon_modified = .false.
 split_scheme = '' ! 'csp2' or 'csp1' or 'isp'
 use_zonal_reduce = .true.
-zonal_reduce_factors = 4,2
+zonal_reduce_factors = 4,4,2,2,2
+reduce_dEdlon = .true.
+reduce_massdiv = .true.
 subcycles = 8
 /
 &mountain_zonal_flow_test_params
